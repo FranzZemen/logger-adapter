@@ -15,7 +15,14 @@ import {inspect} from 'util';
 import {isPromise} from 'util/types';
 import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from './color-constants.js';
 import {ConsoleLogger} from './console-logger.js';
-import {LogExecutionContext, LoggingOptions, LogLevel, LogLevelManagement, validate} from './logger-config.js';
+import {
+  FlattenOption,
+  LogExecutionContext,
+  LoggingOptions,
+  LogLevel,
+  LogLevelManagement,
+  validate
+} from './logger-config.js';
 
 const requireModule = createRequire(import.meta.url);
 const moment = requireModule('moment');
@@ -68,9 +75,7 @@ export class LoggerAdapter implements Logger {
   private timingContext = '';
   private start: number = undefined;
   private interim: number = undefined;
-
-  private attributesAsString: string;
-
+  
   private nativeLogger: Logger;
 
   private pendingEsLoad = false;
@@ -143,14 +148,7 @@ export class LoggerAdapter implements Logger {
     this.initializeOverrides();
     // Overrides could have overridden, and need to recalculate
     this.setLevel(this.ec.log.options.level);
-    this.attributesAsString = ''
-      + (this.ec.log.options.hideAppContext === false ? '; appContext: ' + this.ec.appContext : '')
-      + (this.ec.log.options.hideRepo === false ? '; repo: ' + this.repo : '')
-      + (this.ec.log.options.hideSourceFile === false ? '; sourceFile: ' + this.source : '')
-      + (this.ec.log.options.hideMethod === false ? '; method: ' + this.method : '')
-      + (this.ec.log.options.hideThread === false ? '; thread: ' + this.ec.execution.thread : '')
-      + (this.ec.log.options.hideRequestId === false ? '; requestId: ' + this.ec.execution.requestId : '')
-      + (this.ec.log.options.hideLevel === false ? '; logLevel: ' + LoggerAdapter.levels[this.level] : '');
+
   }
 
   get doInspect(): boolean {
@@ -163,10 +161,6 @@ export class LoggerAdapter implements Logger {
 
   get inspectHidden(): boolean {
     return this.ec.log.options.inspectOptions.showHidden;
-  }
-
-  get doFlattenAttribs(): boolean {
-    return this.ec.log.options.flatten;
   }
 
   get hideTimestamp(): boolean {
@@ -218,7 +212,7 @@ export class LoggerAdapter implements Logger {
   error(err, data?: any, color?: string);
   error(err?, data?: any, color: string = FgRed): boolean | void {
     if(err && this.isErrorEnabled()) {
-      this.log(this.nativeLogger.error, data, err, color, 'ERROR:');
+      const logResult = this.log(data, err, color, 'ERROR:');
     } else {
       return this.isErrorEnabled();
     }
@@ -227,32 +221,60 @@ export class LoggerAdapter implements Logger {
   warn(): boolean;
   warn(data, message?: string, color?: string);
   warn(data?, message?: string, color: string = FgYellow): boolean | void {
-    if (this.isWarnEnabled()) {
-      this.log(this.nativeLogger.warn, data, message, color, 'WARN:');
+    if (data && this.isWarnEnabled()) {
+      const logResult = this.log(data, message, color, 'WARN:');
+      if(logResult.message) {
+        this.nativeLogger.warn(logResult.data, logResult.message);
+      } else {
+        this.nativeLogger.warn(logResult.data);
+      }
+    } else {
+      return this.isWarnEnabled();
     }
   }
 
   info(): boolean;
   info(data, message?: string, color?: string);
   info(data?, message?: string, color: string = FgGreen): boolean | void {
-    if (this.isInfoEnabled()) {
-      this.log(this.nativeLogger.info, data, message, color, 'INFO:');
+    if (data && this.isInfoEnabled()) {
+      const logResult = this.log(data, message, color, 'INFO:');
+      if(logResult.message) {
+        this.nativeLogger.info(logResult.data, logResult.message);
+      } else {
+        this.nativeLogger.info(logResult.data);
+      }
+    } else {
+      return this.isInfoEnabled();
     }
   }
 
   debug(): boolean;
   debug(data, message?: string, color?: string);
   debug(data?, message?: string, color: string = FgCyan): boolean | void {
-    if (this.isDebugEnabled()) {
-      this.log(this.nativeLogger.debug, data, message, color, 'DEBUG:');
+    if (data && this.isDebugEnabled()) {
+      const logResult = this.log(data, message, color, 'DEBUG:');
+      if(logResult.message) {
+        this.nativeLogger.debug(logResult.data, logResult.message);
+      } else {
+        this.nativeLogger.debug(logResult.data);
+      }
+    } else {
+      return this.isDebugEnabled()
     }
   }
 
   trace(): boolean;
   trace(data, message?: string, color?: string);
   trace(data?, message?: string, color: string = FgMagenta): boolean | void {
-    if (this.isTracingEnabled()) {
-      this.log(this.nativeLogger.debug, data, message, color, 'TRACE:');
+    if (data && this.isTracingEnabled()) {
+      const logResult = this.log(data, message, color, 'TRACE:');
+      if(logResult.message) {
+        this.nativeLogger.trace(logResult.data, logResult.message);
+      } else {
+        this.nativeLogger.trace(logResult.data);
+      }
+    } else {
+      return this.isTracingEnabled();
     }
   }
 
@@ -341,20 +363,28 @@ export class LoggerAdapter implements Logger {
     }
   }
 
-  protected log(logMethod: (color: string, logMessage: string) => void, data: any, message: string, color: string, cwcPrefix: string) {
+  protected log(data: any, message: string, color: string, cwcPrefix: string): {data: any, message: string} {
     // TODO modify to support cloud watch format
     if (data && (typeof data === 'string')) {
-      const str = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}${(message ? message + ' ' + data + this.attributesAsString : data + this.attributesAsString)}`;
-      logMethod(color + str + Reset, '');
-    } else if (this.doFlattenAttribs) {
-      const str = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}${(message ? message + ' ' + this.attributesAsString : this.attributesAsString)}` + '\r\n' + Reset + inspect(this.getLogObject(data), this.inspectHidden, this.inspectDepth, true);
-      logMethod(color + str + Reset, '');
-    } else {
-      const str = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}` + '\r\n' + Reset + inspect(this.getLogObject(data, message), this.inspectHidden, this.inspectDepth, true);
+      const _message = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}${(message ? message + ' ' + data + this.attributesAsString : data + this.attributesAsString)}`;
+      return {data: color + _message + Reset, message: undefined};
+    } else if (this.ec.log.options.flatten === FlattenOption.Flatten) {
+      const _message = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}${(message ? message + ' ' + this.attributesAsString : this.attributesAsString)}` + '\r\n' + Reset + inspect(this.getLogObject(data), this.inspectHidden, this.inspectDepth, true);
+      return {data: color + _message + Reset, message: undefined}
+    } else if (this.ec.log.options.flatten === FlattenOption.String) {
+      const _message = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}` + '\r\n' + Reset + inspect(this.getLogObject(data, message), this.inspectHidden, this.inspectDepth, true);
       if (this.hideTimestamp && this.hideSevPrefix) {
-        logMethod(Reset + str, '');
+        return {data: Reset + _message, message: undefined};
       } else {
-        logMethod(color + str + Reset, '');
+        return {data: color + _message + Reset, message: undefined};
+      }
+    } else { // FlattenOption.None
+      const _message = `${this.hideTimestamp ? '' : utc().format(this.timestampFormat) + ' '}${this.hideSevPrefix ? '' : cwcPrefix + ' '}${message}`; 
+      const _data = this.getLogObject(data);
+      if (this.hideTimestamp && this.hideSevPrefix) {
+        return {data: _data, message: Reset + _message};
+      } else {
+        return {data: _data, message: color + _message + Reset};
       }
     }
   }
@@ -431,7 +461,7 @@ export class LoggerAdapter implements Logger {
     if (message) {
       logObject['message'] = message;
     }
-    if (!this.doFlattenAttribs) {
+    if (!(this.ec.log.options.flatten === FlattenOption.Flatten || this.ec.log.options.flatten === FlattenOption.String)) {
       if (!this.hideAppContext) {
         logObject['appContext'] = this.ec.appContext;
       }
@@ -458,6 +488,17 @@ export class LoggerAdapter implements Logger {
       logObject['data'] = data;
     }
     return logObject;
+  }
+
+  get attributesAsString(): string {
+    return ''
+      + (this.ec.log.options.hideAppContext === false ? '; appContext: ' + this.ec.appContext : '')
+      + (this.ec.log.options.hideRepo === false ? '; repo: ' + this.repo : '')
+      + (this.ec.log.options.hideSourceFile === false ? '; sourceFile: ' + this.source : '')
+      + (this.ec.log.options.hideMethod === false ? '; method: ' + this.method : '')
+      + (this.ec.log.options.hideThread === false ? '; thread: ' + this.ec.execution.thread : '')
+      + (this.ec.log.options.hideRequestId === false ? '; requestId: ' + this.ec.execution.requestId : '')
+      + (this.ec.log.options.hideLevel === false ? '; logLevel: ' + LoggerAdapter.levels[this.level] : '');
   }
 }
 

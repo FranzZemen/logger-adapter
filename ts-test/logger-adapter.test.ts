@@ -1,7 +1,14 @@
 import chai from 'chai';
 import 'mocha';
 import * as index from '../publish/index.js';
-import {LogExecutionContext, LoggerAdapter, LogLevel, LogLevelManagement, validate} from '../publish/index.js';
+import {
+  FlattenOption,
+  LogExecutionContext,
+  LoggerAdapter,
+  LogLevel,
+  LogLevelManagement,
+  validate
+} from '../publish/index.js';
 
 let should = chai.should();
 let expect = chai.expect;
@@ -77,7 +84,7 @@ describe('logger-adapter tests', () => {
       log: {
         options: {
           level: 'debug',
-          flatten: true
+          flatten: FlattenOption.Flatten
         }
       }
     };

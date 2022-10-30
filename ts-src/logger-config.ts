@@ -22,6 +22,14 @@ export enum LogLevel {
   trace = 'trace'
 }
 
+export enum FlattenOption {
+  // A text only log is always treated as text, sent as first parameter.  If data exists:
+  None = 'None',       // Log is separated between data and text (first and second parameter), with attributes augmented to the data.
+  Flatten = 'Flatten', // Data is inspect'ed, concatenated to  attributes which are flattened into text and sent as data parameter (first parameter)
+  String = 'String'    // Data is augmented with message and attreibutes is inspect'ed, the string output as data parameter (first parameter)
+
+}
+
 // Where are log levels determined?
 export enum LogLevelManagement {
   Adapter= 'Adapter', // Log level management is driven by the adapter, if possible.
@@ -39,7 +47,7 @@ export class LogExecutionContextDefaults {
     depth: LogExecutionContextDefaults.InspectDepth,
     showHidden: LogExecutionContextDefaults.ShowHiddenInspectProperties
   };
-  static Flatten = false;
+  static Flatten: FlattenOption = FlattenOption.String;
   static HideAppContext = false;
   static HideRepo = false;
   static HideSourceFile = false;
@@ -103,6 +111,7 @@ export interface InspectOptions {
 }
 
 
+
 /**
  * Determines behavior what is actually logged
  */
@@ -112,7 +121,7 @@ export interface LoggingOptions {
   // How inspect() behaves
   inspectOptions?: InspectOptions;
   // The log attributes are 'flattened' into a single line, not logged as an object along with the data.  Default is false
-  flatten?: boolean;
+  flatten?: FlattenOption,
   // Hide timestamp, default is false
   hideTimestamp?: boolean;
   // Hide Severity Prefix (what's output for the level, default is false
@@ -219,7 +228,7 @@ export const optionsSchema: ValidationSchema = {
     default: LogLevel.info
   },
   inspectOptions: inspectOptionsSchemaWrapper,
-  flatten: {type: 'boolean', default: LogExecutionContextDefaults.Flatten},
+  flatten: {type: 'string', default: LogExecutionContextDefaults.Flatten},
   hideAppContext: {type: 'boolean', default: LogExecutionContextDefaults.HideAppContext},
   hideRepo: {type: 'boolean', default: LogExecutionContextDefaults.HideRepo},
   hideSourceFile: {type: 'boolean', default: LogExecutionContextDefaults.HideSourceFile},

@@ -23,9 +23,9 @@ export class ConsoleLogger implements Logger {
       return true;
     }
     if (message) {
-      console.warn(color, data);
-    } else {
       console.warn(color, data, message);
+    } else {
+      console.warn(color, data);
     }
   }
 
@@ -36,9 +36,9 @@ export class ConsoleLogger implements Logger {
       return true;
     }
     if (message) {
-      console.info(color, data);
-    } else {
       console.info(color, data, message);
+    } else {
+      console.info(color, data);
     }
   }
 
@@ -49,9 +49,9 @@ export class ConsoleLogger implements Logger {
       return false;
     }
     if (message) {
-      console.debug(color, data);
-    } else {
       console.debug(color, data, message);
+    } else {
+      console.debug(color, data);
     }
   }
 
@@ -62,9 +62,9 @@ export class ConsoleLogger implements Logger {
       return true;
     }
     if (message) {
-      console.trace(color, data);
-    } else {
       console.trace(color, data, message);
+    } else {
+      console.trace(color, data);
     }
   }
 
