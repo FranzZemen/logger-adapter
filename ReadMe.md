@@ -63,45 +63,27 @@ constructor expects it.
 ## Step 1 Implement Logger
 
     class BunyanLogger {
+        error(): boolean; // is enabled
         error(err, ...params);
         // In the following, data can be an object to log, or a string
+        warn(): boolean; // is enabled
         warn(data, message?: string, ...params);
+        info(): boolean; // is enabled
         info(data, message?: string, ...params);
+        debug(): boolean; // is enabled
         debug(data, message?: string, ...params);
+        trace(): boolean; // is enabled
         trace(data, message?: string, ...params);
+        setLevel(level: LogLevel | string); // Set the log level (called depending on log level management option)
     }
 
 The default actual logger supplied is, of course, the native logger which simply implement the console functions:
-
-
-    class ConsoleLogger implements LoggerI {
-    
-        error(err, stacktrace?: any, color: string = FgRed) {
-            console.error(color, err, stacktrace);
-        }
-        
-        warn(data, message?: string, color: string = FgYellow) {
-            console.warn(color, data, message);
-        }
-        
-        info(data, message?: string, color: string = FgGreen) {
-            console.info(color, data, message);
-        }
-        
-        debug(data, message?: string, color: string = FgCyan) {
-            console.debug(color, data, message);
-        }
-        
-        trace(data, message?: string, color: string = FgMagenta) {
-            console.trace(color, data, message);
-        }       
-    }
 
 @franzzemen/cloudwatch-logs provides an implementation for AWS Cloudwatch logging.  The package is currently under
 private visibility - contact @franzzemen to inquire as to getting access.
 
 Underneath the covers in the @franzzemen libraries, the class Index is created anywhere logging is necessary.
-It's function is to:
+Its function is to:
 
 - Properly load and use logging configuration
 - Instantiate the appropriate logger implementation
@@ -129,7 +111,7 @@ If you do choose to reuse the Logger Adapter, creating it is simple:
         sourcefile: is intended to be the name (no extension) of the source file logging is occuring in
         _method: is intended to bhe the name of the method where logging is occuring
 
-Once created you can call its convenience methods.  Under the covers, it ulimately calls whatever logging
+Once created you can call its convenience methods.  Under the covers, it ultimately calls whatever logging
 implementation you provided (or ConsoleLogger/console otherwise).
 
     error(err, stacktrace?: any, color: string = FgRed)
@@ -141,6 +123,9 @@ implementation you provided (or ConsoleLogger/console otherwise).
 The color is optional, and works only with the console logger, but feel free to use it for your own logger implementations.
 
 ## Configuration
+
+TODO:  NEEDS REWRITE SINCE ENHANCEMENTS
+
 The logging configuration for the Index is passed through @franzzemen libraries through the Execution
 Context as described above.
 
