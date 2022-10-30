@@ -1,18 +1,68 @@
+# Read Me
+LoggerAdapter is a general logger that adapts to any logger.  
+
+The package also exports LogExecutionContext which extends AppExecutionContext in @franzzemen/app-execution-context 
+and is usually the execution context object used in nearly all @franzzemen packages.
+
+LoggerAdapter re-exports a limited number of definitions and functions from ExecutionContext and AppExecutionContext, so
+that in most cases those base packages do not need to be imported.
+
+    export {ExecutionContext, isExecutionContext, validate as validateExecutionContext} from '@franzzemen/execution-context';
+    export {AppExecutionContext, isAppExecutionContext, validate as validateAppExecutionContext} from '@franzzemen/app-execution-context'
+
+# Install
+
+    npm i @franzzemen/logger-adapter
+
+# Usage
+
+This package is published for an ECMAScript module loader.  For CommonJS see below.
+
+### ECMAScript
+
+Create an Logger Adapter with defaults (including Native console logger).
+
+    import {LogExecutionContext, LoggerAdapter, validate} from '@franzzemen/app-execution-context';
+    const ec:LogExecutionContext = {};
+    // The logger adapter will validate ec
+    const log: LoggerAdapter = new LoggerAdapter(ec); 
+    log.info(ec, `I'm alive!`);
+
+## CommonJS
+
+    // Importing types in typescript from CommonJS is allowed
+    import {LogExecutionContext, LoggerAdapter} from '@franzzemen/execution-context';
+
+    import('@franzzemen/logger-adapter')
+        .then(package => {
+            const ec:AppExecutionContext = {};
+            const log: LoggerAdapter = new package.LoggerAdapter(ec);
+            log.info(ec, `I'm alive!`);            
+        }
+
+
 # The Logger Adapter
-Loggers are a tricky thing in libraries and reusable software.  If one defines a specific logger, one can create 
-logging related headaches for users of the system.  Different patterns exist to solve for this; the Logger Adapter 
-is @franzzemen's pattern.
+Most @franzzemen packages can be used in server side node (bare metal), in the browser, and in the cloud.  Moreover, 
+many @franzzemen packages are generally intended to be integrated with other packages, which may have their own 
+logger.  The LoggerAdapter allows any logger to be configured and used.  All that is needed is to create an integration
+proxy that implements @franzzemen/logger-adapter/Logger.  By default, it uses the ConsoleLogger object which is a 
+proxy to the console object.
 
-Essentially the Logger Adapter provides a standard interface within @franzzemen software to perform logging, leaving 
-the physical logger to the user of the library, by way of configuration.  Thus one can use any logger under the 
-covers, including the one for their own software, and configure the @franzzemen logger adapter to play nice.  This 
-can include console loggers, AWS Cloudwatch loggers, any of the many Javascript logger libraries and so on.  You 
-could create SNS or SQS based logger, **and not change a line of code**.
+Essentially the Logger Adapter provides a standard interface within @franzzemen software to perform logging, leaving
+the physical logger to the user of the library, by way of configuration.  Thus one can use any logger under the
+covers, including the one for their own software, and configure the @franzzemen logger adapter to play nice.  This
+can include console loggers, AWS Cloudwatch loggers, any of the many Javascript logger libraries and so on.  Another 
+advantage provided is you can change the logger implementation without changing any code.  This makes the code 
+portable not only between projects but also between environments.
 
-To create a new logger implementation for the adapter, simply implement the LoggerI interface and configure your 
-logger appropriately (and provide that configuration to @franzzemen libraries by way of the[Execution Context](../execution-context.md))
+To create a new logger implementation for the adapter, simply implement the Logger interface and define the module 
+definition in the LogExecutionContext.log.nativeLogger.module property.  You can pass implementation specific 
+arguments such as options through the ModuleDefinition.paramsArray property, in the order your factory function or 
+constructor expects it.
 
-    interface LoggerI {
+## Step 1 Implement Logger
+
+    class BunyanLogger {
         error(err, ...params);
         // In the following, data can be an object to log, or a string
         warn(data, message?: string, ...params);
@@ -46,8 +96,8 @@ The default actual logger supplied is, of course, the native logger which simply
             console.trace(color, data, message);
         }       
     }
-    
-@franzzemen/cloudwatch-logs provides an implementation for AWS Cloudwatch logging.  The package is currently under 
+
+@franzzemen/cloudwatch-logs provides an implementation for AWS Cloudwatch logging.  The package is currently under
 private visibility - contact @franzzemen to inquire as to getting access.
 
 Underneath the covers in the @franzzemen libraries, the class Index is created anywhere logging is necessary.
@@ -58,15 +108,15 @@ It's function is to:
 - Log data/messages/errors according to logging levels, including override configurations
 - Log reference information
 
-You are free to use the Index in your own code if you find it of use - it is quite stable.  If no logger is 
+You are free to use the Index in your own code if you find it of use - it is quite stable.  If no logger is
 supplied in the configuration, the ConsoleLogger (console) will be used.
 
-Note:  At this time @franzzemen uses the Index, which populates additional useful information in the logs 
-regardless of logging implementation.  Many of those are overridable in the configuration if you want to have 
+Note:  At this time @franzzemen uses the Index, which populates additional useful information in the logs
+regardless of logging implementation.  Many of those are overridable in the configuration if you want to have
 "clean" logs.
 
-The LoggerAdapater is meant to be instantiated anywhere logs are needed, typically in each method (although in some 
-cases @franzzemen instantiates a Index for an entire class).  Through configs, one can override the 
+The LoggerAdapater is meant to be instantiated anywhere logs are needed, typically in each method (although in some
+cases @franzzemen instantiates a Index for an entire class).  Through configs, one can override the
 Index instance behavior for a specific method.
 
 If you do choose to reuse the Logger Adapter, creating it is simple:
@@ -79,7 +129,7 @@ If you do choose to reuse the Logger Adapter, creating it is simple:
         sourcefile: is intended to be the name (no extension) of the source file logging is occuring in
         _method: is intended to bhe the name of the method where logging is occuring
 
-Once created you can call its convenience methods.  Under the covers, it ulimately calls whatever logging 
+Once created you can call its convenience methods.  Under the covers, it ulimately calls whatever logging
 implementation you provided (or ConsoleLogger/console otherwise).
 
     error(err, stacktrace?: any, color: string = FgRed)
@@ -91,11 +141,11 @@ implementation you provided (or ConsoleLogger/console otherwise).
 The color is optional, and works only with the console logger, but feel free to use it for your own logger implementations.
 
 ## Configuration
-The logging configuration for the Index is passed through @franzzemen libraries through the Execution 
+The logging configuration for the Index is passed through @franzzemen libraries through the Execution
 Context as described above.
 
-The Execution Context has an optional property "config.log", with the schema being defined in 'logger-config.ts', 
-using the notation from the "fastest-validator" third party OSS package.  The contents of that configuration is 
+The Execution Context has an optional property "config.log", with the schema being defined in 'logger-config.ts',
+using the notation from the "fastest-validator" third party OSS package.  The contents of that configuration is
 described here:
 
     export interface LogConfigI {

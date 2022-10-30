@@ -4,7 +4,7 @@ import {
   appExecutionContextSchema
 } from '@franzzemen/app-execution-context';
 import {ExecutionContextDefaults} from '@franzzemen/execution-context';
-import {ModuleDefinition, moduleDefinitionSchema} from '@franzzemen/module-factory';
+import {ModuleDefinition, moduleDefinitionSchema, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
 import deepmerge from 'deepmerge';
 import {createRequire} from 'node:module';
 import Validator, {ValidationError, ValidationSchema} from 'fastest-validator';
@@ -20,6 +20,13 @@ export enum LogLevel {
   info = 'info',
   debug = 'debug',
   trace = 'trace'
+}
+
+// Where are log levels determined?
+export enum LogLevelManagement {
+  Adapter= 'Adapter', // Log level management is driven by the adapter, if possible.
+  Native = 'Native', // Log level management is driven by the native implementation, if possible.
+  Independent = 'Independent' // Default, log level is driven independently, first by adapter, than by native.  Most restrictive wins.
 }
 
 // Default Values
@@ -44,25 +51,7 @@ export class LogExecutionContextDefaults {
   static HideSeverityPrefix = false;
   static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
 
-  static LevelLabels: { level: LogLevel, label: string }[] = [{
-    level: LogLevel.none,
-    label: 'NONE'
-  }, {
-    level: LogLevel.error,
-    label: 'ERROR'
-  }, {
-    level: LogLevel.warn,
-    label: 'WARN'
-  }, {
-    level: LogLevel.info,
-    label: 'INFO'
-  }, {
-    level: LogLevel.debug,
-    label: 'DEBUG'
-  }, {
-    level: LogLevel.trace,
-    label: 'TRACE'
-  }];
+  static LogLevelManagement = LogLevelManagement.Independent;
 
   static LoggingOptions: LoggingOptions = {
     level: LogLevel.info,
@@ -84,9 +73,13 @@ export class LogExecutionContextDefaults {
     options: LogExecutionContextDefaults.LoggingOptions
   };
 
+  static NativeLogger: NativeLogger = {
+    logLevelManagement: LogExecutionContextDefaults.LogLevelManagement
+  }
+
   static Log: Log = {
     options: LogExecutionContextDefaults.LoggingOptions,
-    levelLabels: LogExecutionContextDefaults.LevelLabels
+    nativeLogger: LogExecutionContextDefaults.NativeLogger
   };
 
   static LogExecutionContext: LogExecutionContext = {
@@ -172,15 +165,18 @@ export interface OverrideOptions {
   options?: LoggingOptions;
 }
 
+export interface NativeLogger {
+  module?: ModuleDefinition;
+  logLevelManagement?: LogLevelManagement;
+}
+
 export interface Log {
   // If present, loads the logger implementation pointed to by ModuleDefinition
-  loggerModule?: ModuleDefinition;
+  nativeLogger?: NativeLogger;
   // Logging options
   options?: LoggingOptions;
   // Logging overrides
   overrides?: OverrideOptions[];
-  // Level Labels
-  levelLabels?: { level: LogLevel, label: string }[];
 }
 
 
@@ -310,16 +306,24 @@ export const overrideOptionsSchemaWrapper: ValidationSchema = {
   props: overrideOptionsSchema
 };
 
+export const nativeLoggerSchema: ValidationSchema = {
+  module: moduleDefinitionSchemaWrapper,
+  logLevelManagement: {
+    type: 'string',
+    optional: true,
+    default: LogExecutionContextDefaults.LogLevelManagement
+  }
+}
 
-
-export const loggerModuleSchemaWrapper: ValidationSchema = {
+export const nativeLoggerSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
-  props: moduleDefinitionSchema
-};
+  default: LogExecutionContextDefaults.NativeLogger,
+  props: nativeLoggerSchema
+}
 
 export const logSchema: ValidationSchema = {
-  loggerModule: loggerModuleSchemaWrapper,
+  nativeLogger: nativeLoggerSchemaWrapper,
   options: optionsSchemaWrapper,
   overrides: {
     type: 'array',

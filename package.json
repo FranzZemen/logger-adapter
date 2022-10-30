@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "main": "index.js",
@@ -22,12 +22,12 @@
   },
   "homepage": "https://github.com/FranzZemen/logger-adapter#readme",
   "devDependencies": {
-    "@franzzemen/gulp-base": "^12.0.4",
+    "@franzzemen/gulp-base": "^12.1.1",
     "@franzzemen/npmu": "^2.0.17",
     "@types/chai": "^4.3.3",
     "@types/mocha": "^10.0.0",
     "@types/moment": "^2.13.0",
-    "@types/node": "^18.11.7",
+    "@types/node": "^18.11.8",
     "chai": "^4.3.6",
     "fastest-validator": "^1.15.0",
     "gulp": "^4.0.2",
@@ -36,9 +36,9 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@franzzemen/app-execution-context": "^1.0.3",
-    "@franzzemen/execution-context": "^1.0.5",
-    "@franzzemen/module-factory": "^1.0.2",
+    "@franzzemen/app-execution-context": "^1.0.4",
+    "@franzzemen/execution-context": "^1.0.6",
+    "@franzzemen/module-factory": "^1.0.3",
     "deepmerge": "^4.2.2",
     "moment": "^2.29.4"
   }

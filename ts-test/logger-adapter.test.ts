@@ -1,6 +1,7 @@
 import chai from 'chai';
 import 'mocha';
-import {LogExecutionContext, LoggerAdapter, LogLevel, validate} from '../publish/index.js';
+import * as index from '../publish/index.js';
+import {LogExecutionContext, LoggerAdapter, LogLevel, LogLevelManagement, validate} from '../publish/index.js';
 
 let should = chai.should();
 let expect = chai.expect;
@@ -20,15 +21,20 @@ describe('logger-adapter tests', () => {
           method: ['method1', 'method2'],
           source: 'index'
         }],
-        loggerModule: {
-          moduleName: 'test',
-          constructorName: 'test',
-          functionName: 'getLogger'
+        nativeLogger: {
+          module: {
+            moduleName: 'test',
+            constructorName: 'test',
+            functionName: 'getLogger'
+          },
+          logLevelManagement: LogLevelManagement.Native
         }
       }
     };
     const result = validate(ec);
     result.should.be.true;
+    const loggerAdapter: LoggerAdapter = new index.LoggerAdapter();
+    loggerAdapter.should.exist;
     done();
   });
   it('should log', done => {
@@ -39,6 +45,7 @@ describe('logger-adapter tests', () => {
         }
       }
     };
+
     const log: LoggerAdapter = new LoggerAdapter(ec);
     done();
   });
@@ -54,12 +61,15 @@ describe('logger-adapter tests', () => {
           hideRequestId: true,
           hideSourceFile: true,
           hideThread: true
+        },
+        nativeLogger: {
+          logLevelManagement: LogLevelManagement.Native
         }
       }
     };
     const log: LoggerAdapter = new LoggerAdapter(ec);
     log.debug('It is bar?');
-    log.debug({foo: 'bar'}, 'It is foo bar');
+    log.info({foo: 'bar'}, 'It is foo bar');
     done();
   });
   it('should log, flattening', done => {
