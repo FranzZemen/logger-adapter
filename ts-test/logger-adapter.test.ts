@@ -2,7 +2,7 @@ import chai from 'chai';
 import 'mocha';
 import * as index from '../publish/index.js';
 import {
-  FlattenOption,
+  AttributesFormatOption,
   LogExecutionContext,
   LoggerAdapter,
   LogLevel,
@@ -62,7 +62,6 @@ describe('logger-adapter tests', () => {
         options: {
           level: 'debug',
           hideAppContext: true,
-          hideLevel: true,
           hideMethod: true,
           hideRepo: true,
           hideRequestId: true,
@@ -84,11 +83,13 @@ describe('logger-adapter tests', () => {
       log: {
         options: {
           level: 'debug',
-          flatten: FlattenOption.Flatten
+          formatOptions: {
+            attributes: AttributesFormatOption.Stringify
+          }
         }
       }
     };
-    const log: LoggerAdapter = new LoggerAdapter(execContext);
+    const log: LoggerAdapter = new LoggerAdapter(execContext, 'logger-adapter', 'logger-adapter.test', 'should log, flattening');
     log.debug('It is bar2?');
     log.debug({foo: 'bar2'}, 'It is foo bar2');
     done();
@@ -99,11 +100,11 @@ describe('logger-adapter tests', () => {
         options: {
           level: 'debug',
           hideTimestamp: true,
-          hideSeverityPrefix: true
+          hideSeverity: true
         }
       }
     };
-    const log: LoggerAdapter = new LoggerAdapter(execContext, 'app-utility', 'logger-config.test', 'should log, hiding timestamp and severity prefix');
+    const log: LoggerAdapter = new LoggerAdapter(execContext, 'logger-adapter', 'logger-adapter.test', 'should log, hiding timestamp and severity prefix');
     log.debug('It is bar2?');
     log.debug({foo: 'bar2'}, 'It is foo bar2');
     done();

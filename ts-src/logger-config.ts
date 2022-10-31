@@ -22,12 +22,20 @@ export enum LogLevel {
   trace = 'trace'
 }
 
-export enum FlattenOption {
-  // A text only log is always treated as text, sent as first parameter.  If data exists:
-  None = 'None',       // Log is separated between data and text (first and second parameter), with attributes augmented to the data.
-  Flatten = 'Flatten', // Data is inspect'ed, concatenated to  attributes which are flattened into text and sent as data parameter (first parameter)
-  String = 'String'    // Data is augmented with message and attreibutes is inspect'ed, the string output as data parameter (first parameter)
+export enum AttributesFormatOption {
+  Stringify = 'Stringify',
+  Inspect = 'Inspect',
+  Augment = 'Augment'
+}
 
+export enum DataFormatOption {
+  Inspect = 'Inspect',
+  Default = 'Default'
+}
+
+export enum MessageFormatOption {
+  Default = 'Default',
+  Augment = 'Augment'
 }
 
 // Where are log levels determined?
@@ -42,38 +50,52 @@ export class LogExecutionContextDefaults {
   static InspectEnabled = true;
   static InspectDepth = 5;
   static ShowHiddenInspectProperties = false;
-  static InspectOptions: InspectOptions = {
-    enabled: LogExecutionContextDefaults.InspectEnabled,
-    depth: LogExecutionContextDefaults.InspectDepth,
-    showHidden: LogExecutionContextDefaults.ShowHiddenInspectProperties
-  };
-  static Flatten: FlattenOption = FlattenOption.String;
+  static InspectColor = true;
+
+  static AttributesFormatOption: AttributesFormatOption = AttributesFormatOption.Augment;
+  static DataFormatOption: DataFormatOption = DataFormatOption.Default;
+  static MessageFormatOption: MessageFormatOption = MessageFormatOption.Default;
+  static HidePrefix = false;
   static HideAppContext = false;
   static HideRepo = false;
   static HideSourceFile = false;
   static HideMethod = false;
   static HideThread = false;
   static HideRequestId = false;
-  static HideLevel = false;
+  static HideAuthorization = false;
   static HideTimestamp = false;
-  static HideSeverityPrefix = false;
+  static HideSeverity = false;
+  static Colorize = true;
   static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
-
   static LogLevelManagement = LogLevelManagement.Independent;
+
+  static InspectOptions: InspectOptions = {
+    enabled: LogExecutionContextDefaults.InspectEnabled,
+    depth: LogExecutionContextDefaults.InspectDepth,
+    showHidden: LogExecutionContextDefaults.ShowHiddenInspectProperties,
+    color: LogExecutionContextDefaults.InspectColor
+  };
+
+  static FormatOptions: FormatOptions = {
+    attributes: LogExecutionContextDefaults.AttributesFormatOption,
+    message: LogExecutionContextDefaults.MessageFormatOption,
+    data: LogExecutionContextDefaults.DataFormatOption
+  }
 
   static LoggingOptions: LoggingOptions = {
     level: LogLevel.info,
     inspectOptions: LogExecutionContextDefaults.InspectOptions,
-    flatten: LogExecutionContextDefaults.Flatten,
+    hidePrefix: LogExecutionContextDefaults.HidePrefix,
     hideTimestamp: LogExecutionContextDefaults.HideTimestamp,
-    hideSeverityPrefix: LogExecutionContextDefaults.HideSeverityPrefix,
+    hideSeverity: LogExecutionContextDefaults.HideSeverity,
     hideAppContext: LogExecutionContextDefaults.HideAppContext,
     hideRepo: LogExecutionContextDefaults.HideRepo,
     hideSourceFile: LogExecutionContextDefaults.HideSourceFile,
     hideMethod: LogExecutionContextDefaults.HideMethod,
     hideThread: LogExecutionContextDefaults.HideThread,
     hideRequestId: LogExecutionContextDefaults.HideRequestId,
-    hideLevel: LogExecutionContextDefaults.HideLevel,
+    hideAuthorization: LogExecutionContextDefaults.HideAuthorization,
+    colorize: LogExecutionContextDefaults.Colorize,
     timestampFormat: LogExecutionContextDefaults.DefaultTimeStampFormat
   };
 
@@ -92,9 +114,10 @@ export class LogExecutionContextDefaults {
 
   static LogExecutionContext: LogExecutionContext = {
     execution: ExecutionContextDefaults.Execution(),
-    appContext: AppExecutionContextDefaults.AppContext,
+    app: AppExecutionContextDefaults.App,
     log: LogExecutionContextDefaults.Log
   };
+
 }
 
 
@@ -108,8 +131,15 @@ export interface InspectOptions {
   depth?: number;
   // Whether node's inspect method should show hidden attributes.  System default is false
   showHidden?: boolean;
+  // Pass color flag to inspect
+  color?: boolean
 }
 
+export interface  FormatOptions {
+  attributes?: AttributesFormatOption,
+  message?: MessageFormatOption,
+  data?: DataFormatOption
+}
 
 
 /**
@@ -120,12 +150,14 @@ export interface LoggingOptions {
   level?: LogLevel | string;
   // How inspect() behaves
   inspectOptions?: InspectOptions;
-  // The log attributes are 'flattened' into a single line, not logged as an object along with the data.  Default is false
-  flatten?: FlattenOption,
+  // How attributes, message, and data are sent to logger
+  formatOptions?: FormatOptions;
+  // If false, same as both hideTimestamp, hideSeverity being false and overrides.  If true, hideTimestamp and hideSeverity override.
+  hidePrefix?: boolean,
   // Hide timestamp, default is false
   hideTimestamp?: boolean;
   // Hide Severity Prefix (what's output for the level, default is false
-  hideSeverityPrefix?: boolean;
+  hideSeverity?: boolean;
   // If true or missing, logs the appContext from the Execution Context, defaults is false
   hideAppContext?: boolean,
   // If true or missing, logs the repo supplied to the LoggingAdapter constructor, default is false
@@ -138,8 +170,10 @@ export interface LoggingOptions {
   hideThread?: boolean,
   // If true or missing, logs requestId from the Execution Context, default is false
   hideRequestId?: boolean,
-  // If true or missing, logs the debug level, default is false
-  hideLevel?: boolean,
+  // If true or missing, logs authorization from the Execution Context, default is false;
+  hideAuthorization?: boolean,
+  // If true, ise colors for text (may not be compatible with all loggers - no harm but inserts control characters
+  colorize?: boolean,
   // Timestamp format (currently from moment.js)
   // It will be validated by stringifying a moment in this format and then using the format to build a moment back
   // and checking for equality.
@@ -207,10 +241,10 @@ export const inspectOptionsSchema: ValidationSchema = {
     type: 'boolean',
     default: LogExecutionContextDefaults.ShowHiddenInspectProperties
   },
-  checked: {
+  color: {
     type: 'boolean',
     optional: true,
-    default: true // If checked/defaulted
+    default: LogExecutionContextDefaults.InspectColor
   }
 };
 export const inspectOptionsSchemaWrapper: ValidationSchema = {
@@ -218,6 +252,31 @@ export const inspectOptionsSchemaWrapper: ValidationSchema = {
   default: LogExecutionContextDefaults.InspectOptions,
   props: inspectOptionsSchema
 };
+
+export const formatOptionsSchema: ValidationSchema = {
+  attributes: {
+    type: 'string',
+    optional: true,
+    default: LogExecutionContextDefaults.AttributesFormatOption
+  },
+  message: {
+    type: 'string',
+    optional: true,
+    default: LogExecutionContextDefaults.MessageFormatOption
+  },
+  data: {
+    type: 'string',
+    optional: true,
+    default: LogExecutionContextDefaults.DataFormatOption
+  }
+}
+
+export const formatOptionsSchemaWrapper = {
+  type: 'object',
+  optional: true,
+  default: LogExecutionContextDefaults.FormatOptions,
+  props: formatOptionsSchema
+}
 
 const systemGenerated = undefined;
 
@@ -228,16 +287,18 @@ export const optionsSchema: ValidationSchema = {
     default: LogLevel.info
   },
   inspectOptions: inspectOptionsSchemaWrapper,
-  flatten: {type: 'string', default: LogExecutionContextDefaults.Flatten},
-  hideAppContext: {type: 'boolean', default: LogExecutionContextDefaults.HideAppContext},
-  hideRepo: {type: 'boolean', default: LogExecutionContextDefaults.HideRepo},
-  hideSourceFile: {type: 'boolean', default: LogExecutionContextDefaults.HideSourceFile},
-  hideMethod: {type: 'boolean', default: LogExecutionContextDefaults.HideMethod},
-  hideThread: {type: 'boolean', default: LogExecutionContextDefaults.HideThread},
-  hideRequestId: {type: 'boolean', default: LogExecutionContextDefaults.HideRequestId},
-  hideLevel: {type: 'boolean', default: LogExecutionContextDefaults.HideLevel},
-  hideTimestamp: {type: 'boolean', default: LogExecutionContextDefaults.HideTimestamp},
-  hideSeverityPrefix: {type: 'boolean', default: LogExecutionContextDefaults.HideSeverityPrefix},
+  formatOptions: formatOptionsSchemaWrapper,
+  hidePrefix: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HidePrefix},
+  hideAppContext: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideAppContext},
+  hideRepo: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideRepo},
+  hideSourceFile: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideSourceFile},
+  hideMethod: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideMethod},
+  hideThread: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideThread},
+  hideRequestId: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideRequestId},
+  hideAuthorization: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideAuthorization},
+  hideTimestamp: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideTimestamp},
+  hideSeverity: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.HideSeverity},
+  colorize: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.Colorize},
   timestampFormat: {
     type: 'string', custom: (value: string, errors: ValidationError[]) => {
       const testFormatStr = moment().format(value);
