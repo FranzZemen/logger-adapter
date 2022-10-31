@@ -98,6 +98,7 @@ export class LogExecutionContextDefaults {
   static Colorize = true;
   static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
   static LogLevelManagement = LogLevelManagement.Independent;
+  static Level = LogLevel.info;
   static Instance(): Logger {
     return new ConsoleLogger();
   }
@@ -116,7 +117,7 @@ export class LogExecutionContextDefaults {
   }
 
   static LoggingOptions: LoggingOptions = {
-    level: LogLevel.info,
+    level: LogExecutionContextDefaults.Level,
     inspectOptions: LogExecutionContextDefaults.InspectOptions,
     hidePrefix: LogExecutionContextDefaults.HidePrefix,
     hideTimestamp: LogExecutionContextDefaults.HideTimestamp,
