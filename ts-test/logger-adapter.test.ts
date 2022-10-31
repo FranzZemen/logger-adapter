@@ -107,6 +107,8 @@ describe('logger-adapter tests', () => {
     const log: LoggerAdapter = new LoggerAdapter(execContext, 'logger-adapter', 'logger-adapter.test', 'should log, hiding timestamp and severity prefix');
     log.debug('It is bar2?');
     log.debug({foo: 'bar2'}, 'It is foo bar2');
+    log.error(new Error('Some Error'))
+    log.error(new Error('Some Error'), 'hello');
     done();
   });
 });

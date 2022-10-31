@@ -261,12 +261,11 @@ export class LoggerAdapter implements Logger {
   }
 
   error(): boolean;
-
   error(err, data?: any, color?: string);
-
   error(err?, data?: any, color: string = FgRed): boolean | void {
     if (err && this.isErrorEnabled()) {
-      const logResult = this.log(data, err, color, 'ERROR:');
+      const logResult = this.log(err, undefined, color, 'ERROR:');
+      this.nativeLogger.error(err, data)
     } else {
       return this.isErrorEnabled();
     }
@@ -425,10 +424,75 @@ export class LoggerAdapter implements Logger {
     }
   }
 
-  protected log(inputData: any, inputMessage: string, inputColor: string, cwcPrefix: string): { data: any, message: string } {
-    if (!inputData && !inputMessage) {
-      return {data: undefined, message: undefined};
+  private processInspect(data: any): string | undefined {
+    let inspectObj;
+    if(this.attributesFormat === AttributesFormatOption.Inspect) {
+      inspectObj = {attributes: this.attributes};
     }
+    if(typeof data === 'object' && this.dataFormat === DataFormatOption.Inspect) {
+      if(inspectObj) {
+        inspectObj.data = data;
+      } else {
+        inspectObj = {data};
+      }
+    }
+    if(inspectObj) {
+      return inspect(inspectObj, this.inspectHidden, this.inspectDepth, this.inspectColor);
+    } else {
+      return undefined;
+    }
+  }
+
+  private processData(data: any, message:string): Object | undefined {
+    let _data;
+    if(message && this.messageFormat === MessageFormatOption.Augment) {
+      if(typeof data !== 'object') {
+        message = `${message} - ${data}`;
+      }
+      _data = {message};
+    } else {
+      if(typeof data !== 'object') {
+        _data = {message: data};
+      }
+    }
+    if(this.attributesFormat === AttributesFormatOption.Augment) {
+      if(_data) {
+        _data.attributes = this.attributes;
+      } else {
+        _data = {
+          attributes: this.attributes
+        };
+      }
+    }
+    if(typeof data === 'object' && this.dataFormat === DataFormatOption.Default) {
+      if(_data) {
+        _data.data = data;
+      } else {
+        _data = {
+          data: data
+        }
+      }
+    }
+    return _data;
+  }
+
+  private processMessage(data: any, message:string, inputColor: string): string | undefined {
+    let _message, color, reset;
+
+    if(message && this.messageFormat === MessageFormatOption.Default) {
+      _message = message;
+    }
+    if(typeof data !== 'object') {
+      if(_message) {
+        _message = `${_message} = ${data}`;
+      } else {
+        _message = `${data}`
+      }
+    }
+    return _message;
+  }
+
+  protected processPrefix(cwcPrefix: string): string {
     let prefix = '';
     if (!this.hidePrefix) {
       if (!this.hideTimestamp) {
@@ -440,6 +504,41 @@ export class LoggerAdapter implements Logger {
         prefix = cwcPrefix;
       }
     }
+    return prefix;
+  }
+
+
+
+
+  protected log(inputData: any, inputMessage: string, inputColor: string, cwcPrefix: string): { data: any, message: string } {
+    let message = this.processMessage(inputData, inputMessage, inputColor);
+    let inspect = this.processInspect(inputColor);
+    let data = this.processData(inputData, inputMessage);
+    let prefix = this.processPrefix(cwcPrefix);
+    if(message) {
+      if(this.colorize) {
+        message = `${inputColor}${prefix}:${message}${Reset}`
+      } else {
+        message = `${prefix}:${message}`
+      }
+    }
+    if(inspect) {
+      if(message) {
+        message = `${message}\r\n${inspect}`;
+      } else {
+        message = inspect;
+      }
+    }
+    return {data, message};
+
+
+
+    //need to handle errr
+    /*
+    if (!inputData && !inputMessage) {
+      return {data: undefined, message: undefined};
+    }
+
     let message;
     let objForInspect;
     let data;
@@ -578,6 +677,8 @@ export class LoggerAdapter implements Logger {
         }
       }
     }
+
+     */
   }
 
   private overrideMatches(override: string | string[], mustMatch: string): true | false | 'no conflict' {
