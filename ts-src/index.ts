@@ -19,7 +19,8 @@ import {ConsoleLogger} from './console-logger.js';
 import {
   AttributesFormatOption,
   DataFormatOption,
-  LogExecutionContext, Logger,
+  LogExecutionContext,
+  Logger,
   LoggingOptions,
   LogLevel,
   LogLevelManagement,
@@ -462,12 +463,28 @@ export class LoggerAdapter implements Logger {
       // There is inputMessage because of first check
       if (message) {
         // From attributes as string
-        message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage} ${message}${reset}`;
+        message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage} ${message}`;
       } else {
-        message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage}${reset}`;
+        message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage}`;
+      }
+      if(message && this.messageFormat === MessageFormatOption.Augment) {
+        if(data) {
+          data.message = message;
+        } else {
+          data = {message};
+        }
+        message = undefined;
+      }
+      if (message) {
+        // Colorize
+        message = `${color}${message}${reset}`;
       }
       if (objForInspect) {
-        message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+        if(message) {
+          message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+        } else {
+          message = `${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+        }
       }
       if (data) {
         return {data, message};
@@ -486,12 +503,28 @@ export class LoggerAdapter implements Logger {
           }
         }
         if (message) {
-          message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputData} - ${message}${reset}`;
+          message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputData} - ${message}`;
         } else {
-          message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputData}${reset}`;
+          message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputData}`;
+        }
+        if(this.messageFormat === MessageFormatOption.Augment) {
+          if(data) {
+            data.message = message;
+          } else {
+            data = {message};
+          }
+          message = undefined;
+        }
+        if (message) {
+          // Colorize
+          message = `${color}${message}${reset}`;
         }
         if (objForInspect) {
-          message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+          if(message) {
+            `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+          } else {
+            message = `${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+          }
         }
         if (data) {
           return {data, message};
@@ -522,7 +555,18 @@ export class LoggerAdapter implements Logger {
           }
         }
         if (message) {
-          message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${message}${reset}`;
+          message = `${prefix.length === 0 ? prefix : prefix + ': '}${message}`;
+        }
+        if(this.messageFormat === MessageFormatOption.Augment) {
+          if(data) {
+            data.message = message;
+          } else {
+            data = {message};
+          }
+          message = undefined;
+        }
+        if (message) {
+          message = `${color}${message}${reset}`;
         }
         if (objForInspect) {
           message = `${message ? message + '\r\n' : ''}${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
