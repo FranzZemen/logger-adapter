@@ -4,7 +4,6 @@ export {
 export {
   AppExecutionContext, isAppExecutionContext, validate as validateAppExecutionContext
 } from '@franzzemen/app-execution-context';
-
 export * from './logger-config.js';
 export * from './color-constants.js';
 
@@ -20,7 +19,7 @@ import {ConsoleLogger} from './console-logger.js';
 import {
   AttributesFormatOption,
   DataFormatOption,
-  LogExecutionContext,
+  LogExecutionContext, Logger,
   LoggingOptions,
   LogLevel,
   LogLevelManagement,
@@ -33,32 +32,6 @@ const moment = requireModule('moment');
 const utc = moment.utc;
 
 
-/**
- * Logger - any object that provides the following interface
- */
-export interface Logger {
-  error(): boolean;
-
-  error(err, ...params);
-
-  warn(): boolean;
-
-  warn(data, message?: string, ...params);
-
-  info(): boolean;
-
-  info(data, message?: string, ...params);
-
-  debug(): boolean;
-
-  debug(data, message?: string, ...params);
-
-  trace(): boolean;
-
-  trace(data, message?: string, ...params);
-
-  setLevel(logLevel: LogLevel | string);
-}
 
 interface AdapterAttributes {
   app: App,
@@ -108,19 +81,13 @@ export class LoggerAdapter implements Logger {
     if (!ec.validated) {
       const result = validate(ec);
       if (isPromise(result)) {
-        let localLogger = nativeLogger;
-        if (!localLogger) {
-          localLogger = new ConsoleLogger();
-        }
+        const localLogger = nativeLogger ? nativeLogger : ec?.log?.nativeLogger?.instance ? ec.log.nativeLogger.instance : new ConsoleLogger();
         const err = new Error('LogExecutionContext validation should not result in async behavior');
         localLogger.error(err);
         throw err;
       }
       if (result !== true) {
-        let localLogger = nativeLogger;
-        if (!localLogger) {
-          localLogger = new ConsoleLogger();
-        }
+        const localLogger = nativeLogger ? nativeLogger : ec?.log?.nativeLogger?.instance ? ec.log.nativeLogger.instance : new ConsoleLogger();
         const msg = 'LogExecutionContext failed validation';
         localLogger.warn(inspect(result, false, 5), msg);
         const err = new Error(msg);
@@ -142,31 +109,35 @@ export class LoggerAdapter implements Logger {
       // Set level based on level management
       this.setLevel(this.ec.log.options.level);
     } else {
-      this.nativeLogger = new ConsoleLogger();
-      const module = this.ec.log.nativeLogger?.module;
-      if (module && module.moduleName && (module.constructorName || module.functionName)) {
-        const impl = loadFromModule<Logger>(module, this.nativeLogger);
-        if (isPromise(impl)) {
-          this.pendingEsLoad = true;
-          this.nativeLogger.warn(this.ec.log.nativeLogger, 'Detected ES module as nativeLogger implementation, using native nativeLogger until it loads');
-          // Not returning promise.  When it's done, we switch loggers.
-          impl
-            .then(logger => {
-              this.nativeLogger.warn('ES module as nativeLogger implementation loaded dynamically');
-              this.nativeLogger = logger;
-              this.pendingEsLoad = false;
-              // Set level based on level management
-              this.setLevel(this.ec.log.options.level);
-            });
-        } else {
-          this.nativeLogger = impl;
-          // Set level based on level management
-          this.setLevel(this.ec.log.options.level);
+      if (ec.log.nativeLogger.instance) {
+        this.nativeLogger = ec.log.nativeLogger.instance;
+        // Set level based on level management
+        this.setLevel(this.ec.log.options.level);
+      } else {
+        this.nativeLogger = new ConsoleLogger();
+        const module = this.ec.log.nativeLogger?.module;
+        if (module && module.moduleName && (module.constructorName || module.functionName)) {
+          const impl = loadFromModule<Logger>(module, this.nativeLogger);
+          if (isPromise(impl)) {
+            this.pendingEsLoad = true;
+            this.nativeLogger.warn(this.ec.log.nativeLogger, 'Detected ES module as nativeLogger implementation, using native nativeLogger until it loads');
+            // Not returning promise.  When it's done, we switch loggers.
+            impl
+              .then(logger => {
+                this.nativeLogger.warn('ES module as nativeLogger implementation loaded dynamically');
+                this.nativeLogger = logger;
+                this.pendingEsLoad = false;
+                // Set level based on level management
+                this.setLevel(this.ec.log.options.level);
+              });
+          } else {
+            this.nativeLogger = impl;
+            // Set level based on level management
+            this.setLevel(this.ec.log.options.level);
+          }
         }
       }
     }
-
-
     this.initializeOverrides();
     // Overrides could have overridden, and need to recalculate
     this.setLevel(this.ec.log.options.level);
@@ -454,8 +425,8 @@ export class LoggerAdapter implements Logger {
   }
 
   protected log(inputData: any, inputMessage: string, inputColor: string, cwcPrefix: string): { data: any, message: string } {
-    if(!inputData && !inputMessage) {
-      return {data:  undefined, message:  undefined};
+    if (!inputData && !inputMessage) {
+      return {data: undefined, message: undefined};
     }
     let prefix = '';
     if (!this.hidePrefix) {
@@ -473,7 +444,7 @@ export class LoggerAdapter implements Logger {
     let data;
     let color;
     let reset;
-    if(this.messageFormat === MessageFormatOption.Default && this.colorize) {
+    if (this.messageFormat === MessageFormatOption.Default && this.colorize) {
       color = inputColor;
       reset = Reset;
     } else { //Augment
@@ -489,16 +460,16 @@ export class LoggerAdapter implements Logger {
     }
     if (!inputData) {
       // There is inputMessage because of first check
-      if(message) {
+      if (message) {
         // From attributes as string
         message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage} ${message}${reset}`;
       } else {
         message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage}${reset}`;
       }
-      if(objForInspect) {
+      if (objForInspect) {
         message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
       }
-      if(data) {
+      if (data) {
         return {data, message};
       } else {
         return {data: message, message: undefined};
@@ -519,10 +490,10 @@ export class LoggerAdapter implements Logger {
         } else {
           message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${inputData}${reset}`;
         }
-        if(objForInspect) {
+        if (objForInspect) {
           message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
         }
-        if(data) {
+        if (data) {
           return {data, message};
         } else {
           return {data: message, message: undefined};
@@ -542,7 +513,7 @@ export class LoggerAdapter implements Logger {
             data = {data: inputData};
           }
         }
-        if(inputMessage) {
+        if (inputMessage) {
           if (message) {
             // Result from attributes as string
             message = `${inputMessage} ${message}`;
@@ -553,10 +524,10 @@ export class LoggerAdapter implements Logger {
         if (message) {
           message = `${color}${prefix.length === 0 ? prefix : prefix + ': '}${message}${reset}`;
         }
-        if(objForInspect) {
-          message = `${message ? message + '\r\n': ''}${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
+        if (objForInspect) {
+          message = `${message ? message + '\r\n' : ''}${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
         }
-        if(data) {
+        if (data) {
           return {data, message};
         } else {
           return {data: message, message: undefined};

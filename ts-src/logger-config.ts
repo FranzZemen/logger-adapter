@@ -4,14 +4,44 @@ import {
   appExecutionContextSchema
 } from '@franzzemen/app-execution-context';
 import {ExecutionContextDefaults} from '@franzzemen/execution-context';
-import {ModuleDefinition, moduleDefinitionSchema, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
+import {ModuleDefinition, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
 import deepmerge from 'deepmerge';
-import {createRequire} from 'node:module';
 import Validator, {ValidationError, ValidationSchema} from 'fastest-validator';
+import {createRequire} from 'node:module';
 import {isPromise} from 'util/types';
+import {ConsoleLogger} from './console-logger.js';
+
 
 const requireModule = createRequire(import.meta.url);
 const moment = requireModule('moment');
+
+
+/**
+ * Logger - any object that provides the following interface
+ */
+export interface Logger {
+  error(): boolean;
+
+  error(err, ...params);
+
+  warn(): boolean;
+
+  warn(data, message?: string, ...params);
+
+  info(): boolean;
+
+  info(data, message?: string, ...params);
+
+  debug(): boolean;
+
+  debug(data, message?: string, ...params);
+
+  trace(): boolean;
+
+  trace(data, message?: string, ...params);
+
+  setLevel(logLevel: LogLevel | string);
+}
 
 export enum LogLevel {
   none = 'none',
@@ -68,6 +98,9 @@ export class LogExecutionContextDefaults {
   static Colorize = true;
   static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
   static LogLevelManagement = LogLevelManagement.Independent;
+  static Instance(): Logger {
+    return new ConsoleLogger();
+  }
 
   static InspectOptions: InspectOptions = {
     enabled: LogExecutionContextDefaults.InspectEnabled,
@@ -211,6 +244,7 @@ export interface OverrideOptions {
 export interface NativeLogger {
   module?: ModuleDefinition;
   logLevelManagement?: LogLevelManagement;
+  instance?: Logger
 }
 
 export interface Log {
@@ -382,6 +416,10 @@ export const nativeLoggerSchema: ValidationSchema = {
     type: 'string',
     optional: true,
     default: LogExecutionContextDefaults.LogLevelManagement
+  },
+  instance: {
+    type: 'object',
+    optional: true,
   }
 }
 
