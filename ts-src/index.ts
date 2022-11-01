@@ -445,11 +445,11 @@ export class LoggerAdapter implements Logger {
   private processData(data: any, message:string): Object | undefined {
     let _data;
     if(message && this.messageFormat === MessageFormatOption.Augment) {
-      if(typeof data !== 'object') {
+      if(data && typeof data !== 'object') {
         message = `${message} - ${data}`;
       }
       _data = {message};
-    } else {
+    } else if(data) {
       if(typeof data !== 'object') {
         _data = {message: data};
       }
@@ -463,13 +463,18 @@ export class LoggerAdapter implements Logger {
         };
       }
     }
-    if(typeof data === 'object' && this.dataFormat === DataFormatOption.Default) {
+    if(data && typeof data === 'object' && this.dataFormat === DataFormatOption.Default) {
       if(_data) {
         _data.data = data;
       } else {
         _data = {
           data: data
         }
+      }
+    }
+    if(_data) {
+      if(this.ec.log.options.dataAsJson) {
+        _data = JSON.stringify(_data);
       }
     }
     return _data;
@@ -529,155 +534,6 @@ export class LoggerAdapter implements Logger {
       }
     }
     return {data, message};
-
-
-
-    //need to handle errr
-    /*
-    if (!inputData && !inputMessage) {
-      return {data: undefined, message: undefined};
-    }
-
-    let message;
-    let objForInspect;
-    let data;
-    let color;
-    let reset;
-    if (this.messageFormat === MessageFormatOption.Default && this.colorize) {
-      color = inputColor;
-      reset = Reset;
-    } else { //Augment
-      color = '';
-      reset = '';
-    }
-    if (this.attributesFormat === AttributesFormatOption.Inspect && this.doInspect) {
-      objForInspect = {attributes: this.attributes};
-    } else if (this.attributesFormat === AttributesFormatOption.Augment) {
-      data = {attributes: this.attributes};
-    } else { // Stringify
-      message = `(${this.attributesAsString})`;
-    }
-    if (!inputData) {
-      // There is inputMessage because of first check
-      if (message) {
-        // From attributes as string
-        message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage} ${message}`;
-      } else {
-        message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputMessage}`;
-      }
-      if(message && this.messageFormat === MessageFormatOption.Augment) {
-        if(data) {
-          data.message = message;
-        } else {
-          data = {message};
-        }
-        message = undefined;
-      }
-      if (message) {
-        // Colorize
-        message = `${color}${message}${reset}`;
-      }
-      if (objForInspect) {
-        if(message) {
-          message = `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
-        } else {
-          message = `${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
-        }
-      }
-      if (data) {
-        return {data, message};
-      } else {
-        return {data: message, message: undefined};
-      }
-    } else {
-      // inputData exists
-      if (typeof inputData === 'string') {
-        if (inputMessage) {
-          if (message) {
-            // Result from attributes as string
-            message = `${inputMessage} ${message}`;
-          } else {
-            message = inputMessage;
-          }
-        }
-        if (message) {
-          message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputData} - ${message}`;
-        } else {
-          message = `${prefix.length === 0 ? prefix : prefix + ': '}${inputData}`;
-        }
-        if(this.messageFormat === MessageFormatOption.Augment) {
-          if(data) {
-            data.message = message;
-          } else {
-            data = {message};
-          }
-          message = undefined;
-        }
-        if (message) {
-          // Colorize
-          message = `${color}${message}${reset}`;
-        }
-        if (objForInspect) {
-          if(message) {
-            `${message}\r\n${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
-          } else {
-            message = `${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
-          }
-        }
-        if (data) {
-          return {data, message};
-        } else {
-          return {data: message, message: undefined};
-        }
-      }
-      if (typeof inputData === 'object') {
-        if (this.dataFormat === DataFormatOption.Inspect && this.doInspect) {
-          if (objForInspect) {
-            objForInspect.data = inputData;
-          } else {
-            objForInspect = {data: inputData};
-          }
-        } else { //if (this.dataFormat === DataFormatOption.Default) {
-          if (data) {
-            data.data = inputData;
-          } else {
-            data = {data: inputData};
-          }
-        }
-        if (inputMessage) {
-          if (message) {
-            // Result from attributes as string
-            message = `${inputMessage} ${message}`;
-          } else {
-            message = inputMessage;
-          }
-        }
-        if (message) {
-          message = `${prefix.length === 0 ? prefix : prefix + ': '}${message}`;
-        }
-        if(this.messageFormat === MessageFormatOption.Augment) {
-          if(data) {
-            data.message = message;
-          } else {
-            data = {message};
-          }
-          message = undefined;
-        }
-        if (message) {
-          message = `${color}${message}${reset}`;
-        }
-        if (objForInspect) {
-          message = `${message ? message + '\r\n' : ''}${inspect(objForInspect, this.inspectHidden, this.inspectDepth, this.inspectColor)}`;
-        }
-        if (data) {
-          return {data, message};
-        } else {
-          return {data: message, message: undefined};
-        }
-      }
-    }
-
-     */
   }
 
   private overrideMatches(override: string | string[], mustMatch: string): true | false | 'no conflict' {

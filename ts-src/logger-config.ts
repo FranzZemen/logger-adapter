@@ -96,6 +96,7 @@ export class LogExecutionContextDefaults {
   static HideSeverity = false;
   static Colorize = true;
   static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
+  static DataAsJson = false;
   static LogLevelManagement = LogLevelManagement.Independent;
   static Level = LogLevel.info;
   static Instance(): Logger {
@@ -210,7 +211,9 @@ export interface LoggingOptions {
   // Timestamp format (currently from moment.js)
   // It will be validated by stringifying a moment in this format and then using the format to build a moment back
   // and checking for equality.
-  timestampFormat?: string
+  timestampFormat?: string,
+  // Print data as JSON, default is false
+  dataAsJson?: boolean
 }
 
 
@@ -346,6 +349,7 @@ export const optionsSchema: ValidationSchema = {
       }
       return value;
     },
+    dataAsJson: {type: 'boolean', optional: true, default: LogExecutionContextDefaults.DataAsJson},
     default: LogExecutionContextDefaults.DefaultTimeStampFormat
   }
 };
