@@ -10,7 +10,6 @@ export * from './color-constants.js';
 import {App, AppExecutionContext} from '@franzzemen/app-execution-context';
 import {Execution} from '@franzzemen/execution-context';
 import {loadFromModule} from '@franzzemen/module-factory';
-import deepmerge from 'deepmerge';
 import {createRequire} from 'module';
 import {inspect} from 'util';
 import {isPromise} from 'util/types';
@@ -21,12 +20,12 @@ import {
   DataFormatOption,
   LogExecutionContext,
   Logger,
-  LoggingOptions,
   LogLevel,
   LogLevelManagement,
   MessageFormatOption,
   validate
 } from './logger-config.js';
+import _ from 'lodash';
 
 const requireModule = createRequire(import.meta.url);
 const moment = requireModule('moment');
@@ -96,7 +95,7 @@ export class LoggerAdapter implements Logger {
         throw err;
       }
     }
-    this.ec = deepmerge({}, ec);
+    this.ec = _.merge<LogExecutionContext, LogExecutionContext>({}, ec);
     this.attributes = {
       repo,
       source,
@@ -731,7 +730,7 @@ export class LoggerAdapter implements Logger {
       }
     });
     if (overrides) {
-      this.ec.log.options = deepmerge<LoggingOptions>(this.ec.log.options, overrides.options);
+      this.ec.log.options = _.merge(this.ec.log.options, overrides.options);
     }
   }
 }

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   AppExecutionContext,
   AppExecutionContextDefaults,
@@ -5,14 +6,12 @@ import {
 } from '@franzzemen/app-execution-context';
 import {ExecutionContextDefaults} from '@franzzemen/execution-context';
 import {ModuleDefinition, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
-import deepmerge from 'deepmerge';
 import Validator, {ValidationError, ValidationSchema} from 'fastest-validator';
 import {createRequire} from 'node:module';
 import {isPromise} from 'util/types';
 import {ConsoleLogger} from './console-logger.js';
-
-
 const requireModule = createRequire(import.meta.url);
+
 const moment = requireModule('moment');
 
 
@@ -448,7 +447,7 @@ export const logSchemaWrapper: ValidationSchema = {
   props: logSchema
 }
 
-export const logExecutionContextSchema: ValidationSchema = deepmerge({
+export const logExecutionContextSchema: ValidationSchema = _.merge({
   log: logSchemaWrapper
 }, appExecutionContextSchema);
 
