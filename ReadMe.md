@@ -1,59 +1,128 @@
 # Read Me
-LoggerAdapter is a general logger that adapts to any logger.  
 
-The package also exports LogExecutionContext which extends AppExecutionContext in @franzzemen/app-execution-context 
-and is usually the execution context object used in nearly all @franzzemen packages.
+This package exposes two key object:
 
-LoggerAdapter re-exports a limited number of definitions and functions from ExecutionContext and AppExecutionContext, so
-that in most cases those base packages do not need to be imported.
-
-    export {ExecutionContext, isExecutionContext, validate as validateExecutionContext} from '@franzzemen/execution-context';
-    export {AppExecutionContext, isAppExecutionContext, validate as validateAppExecutionContext} from '@franzzemen/app-execution-context'
+1. LogExecutionContext:  This is an execution context used throughout @franzzzemen API calls.
+2. LoggerAdapter:  This is the logger @franzzemen APIs use, and can be configured to any logging system.  By default 
+   it uses the console logger.
 
 # Install
 
+Installation is usually included in @franzzemen package installs.  It can also be individually installed:
+
     npm i @franzzemen/logger-adapter
 
-# Usage
+# Module Loading
 
-This package is published for an ECMAScript module loader.  For CommonJS see below.
-
-### ECMAScript
-
-Create an Logger Adapter with defaults (including Native console logger).
-
-    import {LogExecutionContext, LoggerAdapter, validate} from '@franzzemen/app-execution-context';
-    const ec:LogExecutionContext = {};
-    // The logger adapter will validate ec
-    const log: LoggerAdapter = new LoggerAdapter(ec); 
-    log.info(ec, `I'm alive!`);
-
-## CommonJS
-
-    // Importing types in typescript from CommonJS is allowed
-    import {LogExecutionContext, LoggerAdapter} from '@franzzemen/execution-context';
-
-    import('@franzzemen/logger-adapter')
-        .then(package => {
-            const ec:AppExecutionContext = {};
-            const log: LoggerAdapter = new package.LoggerAdapter(ec);
-            log.info(ec, `I'm alive!`);            
-        }
+This package is published for an ECMAScript module loader.  It can be be used in CommonJS modules through dynamic 
+import...import().
 
 
 # The Logger Adapter
-Most @franzzemen packages can be used in server side node (bare metal), in the browser, and in the cloud.  Moreover, 
-many @franzzemen packages are generally intended to be integrated with other packages, which may have their own 
-logger.  The LoggerAdapter allows any logger to be configured and used.  All that is needed is to create an integration
-proxy that implements @franzzemen/logger-adapter/Logger.  By default, it uses the ConsoleLogger object which is a 
-proxy to the console object.
 
-Essentially the Logger Adapter provides a standard interface within @franzzemen software to perform logging, leaving
-the physical logger to the user of the library, by way of configuration.  Thus one can use any logger under the
-covers, including the one for their own software, and configure the @franzzemen logger adapter to play nice.  This
-can include console loggers, AWS Cloudwatch loggers, any of the many Javascript logger libraries and so on.  Another 
-advantage provided is you can change the logger implementation without changing any code.  This makes the code 
-portable not only between projects but also between environments.
+The LoggerAdapter provides transportability for @franzzemen projects to run in the browser, on-Prem or in a cloud 
+environment, and to support various loggers.  
+
+The LoggerAdapter provides a relatively standard interface to logging, which is virtually identical to console 
+logging methods.  Some methods ommitted for clarity:
+
+    // Some methods omitted for clarity
+    interface Logger: { 
+        error(err: Error, ...params);
+        warn(data: any, message?: string, ...params);
+        info(data: any, message?: string, ...params);
+        debug(data: any, message?: string, ...params);
+        trace(data: any, message?: string, ...params);
+    }
+
+Allowing for logs such as:
+
+    log: Logger = ...
+    log.info('Hello World');
+    log.info({foo:'bar, jack:'jill'},'Random log');
+
+The actual end logger by default is the console, but any logger can be configured.  Most @franzzemen projects expect to 
+be integrated into larger projects in different environments, so supporting the larger project's logger is a key design 
+point.
+
+# Usage
+
+Typically an integrating project would not deal with LoggerAdapter directly.  It is called within the @franzzemen 
+projects.  however, if desired, it can indeed be instantiated anywhere. 
+
+It is designed to be instantiated in very local context, i.e. within a method or class, but the same instance could 
+be used in a broader context.   Typically however, it identifies the package, source and method the logging occured 
+in, so it is advantageous to keep its instantiation fine-grained:
+
+    // Package @franzzemen/foo
+    // Source bar.ts
+    function car(param1, param2, ..., ec?: LogExecutionContext) {
+        const log = new LoggerAdapter(ec,'foo', 'bar,'car');
+        ...
+        log.info('some log');
+    }
+
+Since virtually all @franzzemen APIs call for an optional parameter ec?: LogExecutionContext, most users will interact
+with the logger through the options LogExecutionContext.  It is also through these options that end users can most 
+easily integrate their own logger systems.
+
+# LogExecutionContext
+
+As mentioned, virtually all @franzzemen APIs can be supplied with an optional LogExecutionContext, which can be 
+thought of as options.
+
+The base interface of these options is ExecutionContext, covered in the @franzzemen/execution-context package.  This 
+interface provides @franzzemen packages with information about the run-time environment, request info and 
+multi-process tracking.
+
+The AppExecutionContext extends the ExecutionContext to provide information about the application running the code, 
+for example the appContext, or the name of the application.
+
+Finally the LogExecution extends the AppExecutionContext to provide logging configuration.  Logging is such an 
+essential part of executing code and so the @franzzemen packages give it first class citizenry. By design almost 
+every function and method invoked will pass an execution context, usually the LogExecutionContext.
+
+Locally created LoggingAdapter based on the passed in LogExecutionContext results in logs that point directly to 
+exaclty where the log information was generated.
+
+The LogExecution Context top level objects are:
+
+    {
+        execution?: Execution;  // From Execution Context
+        app?: App;              // From AppExecutionContext
+        log?: Log;              // From LogExecutionContext
+    }
+
+For purposes of logging, we are only interested in the third property, log.
+
+    log: {
+        nativeLogger?: NativeLogger;    // Options defining the underlying logger
+        options?: LoggingOptions;       // Options driving logging behavior
+        overrides?: OverrideOptions[];  // Array of overrides for options based on the repo, source, or method
+    }
+
+## Logging Options
+
+Logging Options are:
+
+    {
+        level?: LogLevel | string;          // The log level in the so calle standard of 'none', 'error', 'warn', 'info', 'debug' and 'trace'
+        inspectOptions?: InspectOptions;    // The behavior when node.inspect is used
+        formatOptions?: FormatOptions;      // How data, mesage and logging attributes are handled
+        hidePrefix?: boolean,               // Whether to hide the prefix, which is essentially the timestamp and the severity
+        hideTimestamp?: boolean;            // Whether to hid or show timestamp.  No effect if hidePrefix is true.
+        hideSeverity?: boolean;             // Whether to hide severity.  No effect if hidePreifx is true;
+        hideAppContext?: boolean,           // Don't log the appContext
+        hideRepo?: boolean,                 // Don't log the repo
+        hideSourceFile?: boolean,           // Don't log the source
+        hideMethod?: boolean,               // Don't log the method
+        hideThread?: boolean,               // Don't log the threqad
+        hideRequestId?: boolean,            // Don't log the  requestId
+        hideAuthorization?: boolean,        // Don't log authorizations (what an authenticated identity has access to)
+        colorize?: boolean                  // For supported loggers (console) turn on color coding logs
+        timestampFormat?: string,           // Timestamp format to use for moment
+        dataAsJson?: boolean                // When data is an object, log it as JSoN
+
 
 To create a new logger implementation for the adapter, simply implement the Logger interface and define the module 
 definition in the LogExecutionContext.log.nativeLogger.module property.  You can pass implementation specific 
