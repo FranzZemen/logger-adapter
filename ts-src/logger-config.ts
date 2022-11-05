@@ -119,6 +119,7 @@ export class LogExecutionContextDefaults {
   static LoggingOptions: LoggingOptions = {
     level: LogExecutionContextDefaults.Level,
     inspectOptions: LogExecutionContextDefaults.InspectOptions,
+    formatOptions: LogExecutionContextDefaults.FormatOptions,
     hidePrefix: LogExecutionContextDefaults.HidePrefix,
     hideTimestamp: LogExecutionContextDefaults.HideTimestamp,
     hideSeverity: LogExecutionContextDefaults.HideSeverity,
