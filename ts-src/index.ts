@@ -4,7 +4,7 @@ export {
 export * from './logger-config.js';
 export * from './color-constants.js';
 
-import {App, AppExecutionContext} from '@franzzemen/app-execution-context';
+import {App} from '@franzzemen/app-execution-context';
 import {Execution} from '@franzzemen/execution-context';
 import {loadFromModule} from '@franzzemen/module-factory';
 import {createRequire} from 'module';
