@@ -464,7 +464,7 @@ export const logExecutionContextSchemaWrapper: ValidationSchema = {
 };
 
 export function isLogExecutionContext(options: any | LogExecutionContext): options is LogExecutionContext {
-  return 'log' in options; // Faster than validate
+  return options && 'log' in options; // Faster than validate
 }
 
 const check = (new Validator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
