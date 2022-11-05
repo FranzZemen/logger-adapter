@@ -59,11 +59,15 @@ export class LoggerAdapter implements Logger {
   private start: number = undefined;
   private interim: number = undefined;
 
-  private nativeLogger: Logger;
+  private _nativeLogger: Logger;
 
   private pendingEsLoad = false;
 
   private attributes: AdapterAttributes;
+  
+  get nativeLogger(): Logger {
+    return this._nativeLogger;
+  }
 
 
   /**
@@ -72,7 +76,7 @@ export class LoggerAdapter implements Logger {
    * @param repo Provides logging info that the log event occurred in this repo
    * @param source Provides logging info that the log event occurred in this source file
    * @param method Provides logging info that the log event occurred in this method
-   * @param nativeLogger  If passed, will use this over the native nativeLogger or a module definition
+   * @param nativeLogger  If passed, will use this over the native _nativeLogger or a module definition
    */
   constructor(ec: LogExecutionContext = {}, repo = '', source = '', method = '', nativeLogger?: Logger) {
     if (!ec.validated) {
@@ -100,35 +104,35 @@ export class LoggerAdapter implements Logger {
       app: this.ec.app,
       execution: this.ec.execution
     };
-    // Use the console nativeLogger unless another one is provided, or later loaded by module
+    // Use the console _nativeLogger unless another one is provided, or later loaded by module
     if (nativeLogger) {
-      this.nativeLogger = nativeLogger;
+      this._nativeLogger = nativeLogger;
       // Set level based on level management
       this.setLevel(this.ec.log.options.level);
     } else {
       if (ec.log.nativeLogger.instance) {
-        this.nativeLogger = ec.log.nativeLogger.instance;
+        this._nativeLogger = ec.log.nativeLogger.instance;
         // Set level based on level management
         this.setLevel(this.ec.log.options.level);
       } else {
-        this.nativeLogger = new ConsoleLogger();
+        this._nativeLogger = new ConsoleLogger();
         const module = this.ec.log.nativeLogger?.module;
         if (module && module.moduleName && (module.constructorName || module.functionName)) {
-          const impl = loadFromModule<Logger>(module, this.nativeLogger);
+          const impl = loadFromModule<Logger>(module, this._nativeLogger);
           if (isPromise(impl)) {
             this.pendingEsLoad = true;
-            this.nativeLogger.warn(this.ec.log.nativeLogger, 'Detected ES module as nativeLogger implementation, using native nativeLogger until it loads');
+            this._nativeLogger.warn(this.ec.log.nativeLogger, 'Detected ES module as _nativeLogger implementation, using native _nativeLogger until it loads');
             // Not returning promise.  When it's done, we switch loggers.
             impl
               .then(logger => {
-                this.nativeLogger.warn('ES module as nativeLogger implementation loaded dynamically');
-                this.nativeLogger = logger;
+                this._nativeLogger.warn('ES module as _nativeLogger implementation loaded dynamically');
+                this._nativeLogger = logger;
                 this.pendingEsLoad = false;
                 // Set level based on level management
                 this.setLevel(this.ec.log.options.level);
               });
           } else {
-            this.nativeLogger = impl;
+            this._nativeLogger = impl;
             // Set level based on level management
             this.setLevel(this.ec.log.options.level);
           }
@@ -261,7 +265,7 @@ export class LoggerAdapter implements Logger {
   error(err?, data?: any, color: string = FgRed): boolean | void {
     if (err && this.isErrorEnabled()) {
       const logResult = this.log(err, undefined, color, 'ERROR:');
-      this.nativeLogger.error(err, data)
+      this._nativeLogger.error(err, data)
     } else {
       return this.isErrorEnabled();
     }
@@ -275,9 +279,9 @@ export class LoggerAdapter implements Logger {
     if (data && this.isWarnEnabled()) {
       const logResult = this.log(data, message, color, 'WARN:');
       if (logResult.message) {
-        this.nativeLogger.warn(logResult.data, logResult.message);
+        this._nativeLogger.warn(logResult.data, logResult.message);
       } else {
-        this.nativeLogger.warn(logResult.data);
+        this._nativeLogger.warn(logResult.data);
       }
     } else {
       return this.isWarnEnabled();
@@ -292,9 +296,9 @@ export class LoggerAdapter implements Logger {
     if (data && this.isInfoEnabled()) {
       const logResult = this.log(data, message, color, 'INFO:');
       if (logResult.message) {
-        this.nativeLogger.info(logResult.data, logResult.message);
+        this._nativeLogger.info(logResult.data, logResult.message);
       } else {
-        this.nativeLogger.info(logResult.data);
+        this._nativeLogger.info(logResult.data);
       }
     } else {
       return this.isInfoEnabled();
@@ -309,9 +313,9 @@ export class LoggerAdapter implements Logger {
     if (data && this.isDebugEnabled()) {
       const logResult = this.log(data, message, color, 'DEBUG:');
       if (logResult.message) {
-        this.nativeLogger.debug(logResult.data, logResult.message);
+        this._nativeLogger.debug(logResult.data, logResult.message);
       } else {
-        this.nativeLogger.debug(logResult.data);
+        this._nativeLogger.debug(logResult.data);
       }
     } else {
       return this.isDebugEnabled();
@@ -326,9 +330,9 @@ export class LoggerAdapter implements Logger {
     if (data && this.isTracingEnabled()) {
       const logResult = this.log(data, message, color, 'TRACE:');
       if (logResult.message) {
-        this.nativeLogger.trace(logResult.data, logResult.message);
+        this._nativeLogger.trace(logResult.data, logResult.message);
       } else {
-        this.nativeLogger.trace(logResult.data);
+        this._nativeLogger.trace(logResult.data);
       }
     } else {
       return this.isTracingEnabled();
@@ -338,7 +342,7 @@ export class LoggerAdapter implements Logger {
   setLevel(logLevel: LogLevel | string) {
     this.level = LoggerAdapter.levels.indexOf(logLevel);
     if (this.ec.log.nativeLogger.logLevelManagement === LogLevelManagement.Adapter) {
-      this.nativeLogger.setLevel(logLevel);
+      this._nativeLogger.setLevel(logLevel);
     }
   }
 
@@ -378,7 +382,7 @@ export class LoggerAdapter implements Logger {
   public isErrorEnabled(): boolean {
     const mgmt = this.ec.log.nativeLogger.logLevelManagement;
     if (mgmt && mgmt === LogLevelManagement.Native) {
-      return this.nativeLogger.error();
+      return this._nativeLogger.error();
     } else {
       return this.level > LoggerAdapter._noLogging;
     }
@@ -387,7 +391,7 @@ export class LoggerAdapter implements Logger {
   public isWarnEnabled(): boolean {
     const mgmt = this.ec.log.nativeLogger.logLevelManagement;
     if (mgmt && mgmt === LogLevelManagement.Native) {
-      return this.nativeLogger.warn();
+      return this._nativeLogger.warn();
     } else {
       return this.level > LoggerAdapter._error;
     }
@@ -396,7 +400,7 @@ export class LoggerAdapter implements Logger {
   public isInfoEnabled(): boolean {
     const mgmt = this.ec.log.nativeLogger.logLevelManagement;
     if (mgmt && mgmt === LogLevelManagement.Native) {
-      return this.nativeLogger.info();
+      return this._nativeLogger.info();
     } else {
       return this.level > LoggerAdapter._warn;
     }
@@ -405,7 +409,7 @@ export class LoggerAdapter implements Logger {
   public isDebugEnabled(): boolean {
     const mgmt = this.ec.log.nativeLogger.logLevelManagement;
     if (mgmt && mgmt === LogLevelManagement.Native) {
-      return this.nativeLogger.debug();
+      return this._nativeLogger.debug();
     } else {
       return this.level > LoggerAdapter._info;
     }
@@ -414,7 +418,7 @@ export class LoggerAdapter implements Logger {
   public isTracingEnabled(): boolean {
     const mgmt = this.ec.log.nativeLogger.logLevelManagement;
     if (mgmt && mgmt === LogLevelManagement.Native) {
-      return this.nativeLogger.trace();
+      return this._nativeLogger.trace();
     } else {
       return this.level > LoggerAdapter._debug;
     }

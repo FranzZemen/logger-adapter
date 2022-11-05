@@ -23,6 +23,8 @@ export const npmu  = (cb) => {
     }, {
       path: join(__dirname, '../app-execution-context'), packageName: '@franzzemen/app-execution-context',
     }, {
+      path: join(__dirname, '../logger-adapter'), packageName: '@franzzemen/logger-adapter',
+    }, {
       path: join(__dirname, './'), packageName: '@franzzemen/logger-adapter',
     }])
     .then(() => {
