@@ -6,16 +6,33 @@ This package exposes two key object:
 2. LoggerAdapter:  This is the logger @franzzemen APIs use, and can be configured to any logging system.  By default 
    it uses the console logger.
 
+This package has both a CommonJS api and an ECMAScript api
+
 # Install
 
 Installation is usually included in @franzzemen package installs.  It can also be individually installed:
 
     npm i @franzzemen/logger-adapter
 
-# Module Loading
+# Usage
 
-This package is published for an ECMAScript module loader.  It can be be used in CommonJS modules through dynamic 
-import...import().
+
+From CommonJS:
+
+```` javascript
+const LoggerAdapter = require('@franzzemen/logger-adapter').LoggerAdapter;
+
+const log = new LoggerAdapter({}, 'myModule','mySourceFile', 'myFunction');
+````
+
+From ECMAScript:
+
+```` typescript
+import {LoggerAdapter} from '@franzzemen/logger-adapter');
+
+const log = new LoggerAdapter({}, 'myModule','mySourceFile', 'myFunction');
+
+````
 
 
 # The Logger Adapter
@@ -47,7 +64,7 @@ point.
 
 # Usage
 
-Typically an integrating project would not deal with LoggerAdapter directly.  It is called within the @franzzemen 
+Typically, an integrating project would not deal with LoggerAdapter directly.  It is called within the @franzzemen 
 projects.  however, if desired, it can indeed be instantiated anywhere. 
 
 It is designed to be instantiated in very local context, i.e. within a method or class, but the same instance could 

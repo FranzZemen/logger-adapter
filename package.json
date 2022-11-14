@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "main": "./publish/dist/cjs/index.js",
