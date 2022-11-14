@@ -1,10 +1,12 @@
 export * from './logger-config.js';
 export * from './color-constants.js';
+export * from './console-logger.js';
 
 import {App} from '@franzzemen/app-execution-context';
 import {Execution} from '@franzzemen/execution-context';
 import {loadFromModule} from '@franzzemen/module-factory';
-import {createRequire} from 'module';
+import _ from 'lodash';
+import moment from 'moment';
 import {inspect} from 'util';
 import {isPromise} from 'util/types';
 import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from './color-constants.js';
@@ -19,12 +21,8 @@ import {
   MessageFormatOption,
   validate
 } from './logger-config.js';
-import _ from 'lodash';
 
-const requireModule = createRequire(import.meta.url);
-const moment = requireModule('moment');
 const utc = moment.utc;
-
 
 
 interface AdapterAttributes {
@@ -55,17 +53,8 @@ export class LoggerAdapter implements Logger {
   private timingContext = '';
   private start: number = undefined;
   private interim: number = undefined;
-
-  private _nativeLogger: Logger;
-
   private pendingEsLoad = false;
-
   private attributes: AdapterAttributes;
-  
-  get nativeLogger(): Logger {
-    return this._nativeLogger;
-  }
-
 
   /**
    * All parameters optional.
@@ -115,24 +104,17 @@ export class LoggerAdapter implements Logger {
         this._nativeLogger = new ConsoleLogger();
         const module = this.ec.log.nativeLogger?.module;
         if (module && module.moduleName && (module.constructorName || module.functionName)) {
-          const impl = loadFromModule<Logger>(module, this._nativeLogger);
-          if (isPromise(impl)) {
-            this.pendingEsLoad = true;
-            this._nativeLogger.warn(this.ec.log.nativeLogger, 'Detected ES module as _nativeLogger implementation, using native _nativeLogger until it loads');
-            // Not returning promise.  When it's done, we switch loggers.
-            impl
-              .then(logger => {
-                this._nativeLogger.warn('ES module as _nativeLogger implementation loaded dynamically');
-                this._nativeLogger = logger;
-                this.pendingEsLoad = false;
-                // Set level based on level management
-                this.setLevel(this.ec.log.options.level);
-              });
-          } else {
-            this._nativeLogger = impl;
-            // Set level based on level management
-            this.setLevel(this.ec.log.options.level);
-          }
+          const implPromise = loadFromModule<Logger>(module, this._nativeLogger);
+          this.pendingEsLoad = true;
+          // Not returning promise.  When it's done, we switch loggers.
+          implPromise
+            .then(logger => {
+              this._nativeLogger.warn('ES module as _nativeLogger implementation loaded dynamically');
+              this._nativeLogger = logger;
+              this.pendingEsLoad = false;
+              // Set level based on level management
+              this.setLevel(this.ec.log.options.level);
+            });
         }
       }
     }
@@ -140,6 +122,12 @@ export class LoggerAdapter implements Logger {
     // Overrides could have overridden, and need to recalculate
     this.setLevel(this.ec.log.options.level);
 
+  }
+
+  private _nativeLogger: Logger;
+
+  get nativeLogger(): Logger {
+    return this._nativeLogger;
   }
 
   get doInspect(): boolean {
@@ -262,7 +250,7 @@ export class LoggerAdapter implements Logger {
   error(err?, data?: any, color: string = FgRed): boolean | void {
     if (err && this.isErrorEnabled()) {
       const logResult = this.log(err, undefined, color, 'ERROR:');
-      this._nativeLogger.error(err, data)
+      this._nativeLogger.error(err, data);
     } else {
       return this.isErrorEnabled();
     }
@@ -421,79 +409,6 @@ export class LoggerAdapter implements Logger {
     }
   }
 
-  private processInspect(data: any): string | undefined {
-    let inspectObj;
-    if(this.attributesFormat === AttributesFormatOption.Inspect) {
-      inspectObj = {attributes: this.attributes};
-    }
-    if(typeof data === 'object' && this.dataFormat === DataFormatOption.Inspect) {
-      if(inspectObj) {
-        inspectObj.data = data;
-      } else {
-        inspectObj = {data};
-      }
-    }
-    if(inspectObj) {
-      return inspect(inspectObj, this.inspectHidden, this.inspectDepth, this.inspectColor);
-    } else {
-      return undefined;
-    }
-  }
-
-  private processData(data: any, message:string): Object | undefined {
-    let _data;
-    if(message && this.messageFormat === MessageFormatOption.Augment) {
-      if(data && typeof data !== 'object') {
-        message = `${message} - ${data}`;
-      }
-      _data = {message};
-    } else if(data) {
-      if(typeof data !== 'object') {
-        _data = {message: data};
-      }
-    }
-    if(this.attributesFormat === AttributesFormatOption.Augment) {
-      if(_data) {
-        _data.attributes = this.attributes;
-      } else {
-        _data = {
-          attributes: this.attributes
-        };
-      }
-    }
-    if(data && typeof data === 'object' && this.dataFormat === DataFormatOption.Default) {
-      if(_data) {
-        _data.data = data;
-      } else {
-        _data = {
-          data: data
-        }
-      }
-    }
-    if(_data) {
-      if(this.ec.log.options.dataAsJson) {
-        _data = JSON.stringify(_data);
-      }
-    }
-    return _data;
-  }
-
-  private processMessage(data: any, message:string, inputColor: string): string | undefined {
-    let _message, color, reset;
-
-    if(message && this.messageFormat === MessageFormatOption.Default) {
-      _message = message;
-    }
-    if(typeof data !== 'object') {
-      if(_message) {
-        _message = `${_message} = ${data}`;
-      } else {
-        _message = `${data}`
-      }
-    }
-    return _message;
-  }
-
   protected processPrefix(cwcPrefix: string): string {
     let prefix = '';
     if (!this.hidePrefix) {
@@ -509,29 +424,99 @@ export class LoggerAdapter implements Logger {
     return prefix;
   }
 
-
-
-
   protected log(inputData: any, inputMessage: string, inputColor: string, cwcPrefix: string): { data: any, message: string } {
     let message = this.processMessage(inputData, inputMessage, inputColor);
     let inspect = this.processInspect(inputColor);
     let data = this.processData(inputData, inputMessage);
     let prefix = this.processPrefix(cwcPrefix);
-    if(message) {
-      if(this.colorize) {
-        message = `${inputColor}${prefix}:${message}${Reset}`
+    if (message) {
+      if (this.colorize) {
+        message = `${inputColor}${prefix}:${message}${Reset}`;
       } else {
-        message = `${prefix}:${message}`
+        message = `${prefix}:${message}`;
       }
     }
-    if(inspect) {
-      if(message) {
+    if (inspect) {
+      if (message) {
         message = `${message}\r\n${inspect}`;
       } else {
         message = inspect;
       }
     }
     return {data, message};
+  }
+
+  private processInspect(data: any): string | undefined {
+    let inspectObj;
+    if (this.attributesFormat === AttributesFormatOption.Inspect) {
+      inspectObj = {attributes: this.attributes};
+    }
+    if (typeof data === 'object' && this.dataFormat === DataFormatOption.Inspect) {
+      if (inspectObj) {
+        inspectObj.data = data;
+      } else {
+        inspectObj = {data};
+      }
+    }
+    if (inspectObj) {
+      return inspect(inspectObj, this.inspectHidden, this.inspectDepth, this.inspectColor);
+    } else {
+      return undefined;
+    }
+  }
+
+  private processData(data: any, message: string): Object | undefined {
+    let _data;
+    if (message && this.messageFormat === MessageFormatOption.Augment) {
+      if (data && typeof data !== 'object') {
+        message = `${message} - ${data}`;
+      }
+      _data = {message};
+    } else if (data) {
+      if (typeof data !== 'object') {
+        _data = {message: data};
+      }
+    }
+    if (this.attributesFormat === AttributesFormatOption.Augment) {
+      if (_data) {
+        _data.attributes = this.attributes;
+      } else {
+        _data = {
+          attributes: this.attributes
+        };
+      }
+    }
+    if (data && typeof data === 'object' && this.dataFormat === DataFormatOption.Default) {
+      if (_data) {
+        _data.data = data;
+      } else {
+        _data = {
+          data: data
+        };
+      }
+    }
+    if (_data) {
+      if (this.ec.log.options.dataAsJson) {
+        _data = JSON.stringify(_data);
+      }
+    }
+    return _data;
+  }
+
+  private processMessage(data: any, message: string, inputColor: string): string | undefined {
+    let _message, color, reset;
+
+    if (message && this.messageFormat === MessageFormatOption.Default) {
+      _message = message;
+    }
+    if (typeof data !== 'object') {
+      if (_message) {
+        _message = `${_message} = ${data}`;
+      } else {
+        _message = `${data}`;
+      }
+    }
+    return _message;
   }
 
   private overrideMatches(override: string | string[], mustMatch: string): true | false | 'no conflict' {

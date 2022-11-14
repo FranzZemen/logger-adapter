@@ -1,6 +1,5 @@
 import chai from 'chai';
 import 'mocha';
-import * as index from '../publish/index.js';
 import {
   AttributesFormatOption,
   LogExecutionContext,
@@ -8,7 +7,8 @@ import {
   LogLevel,
   LogLevelManagement,
   validate
-} from '../publish/index.js';
+  // @ts-ignore
+} from '@franzzemen/logger-adapter';
 
 let should = chai.should();
 let expect = chai.expect;
@@ -40,7 +40,7 @@ describe('logger-adapter tests', () => {
     };
     const result = validate(ec);
     result.should.be.true;
-    const loggerAdapter: LoggerAdapter = new index.LoggerAdapter();
+    const loggerAdapter: LoggerAdapter = new LoggerAdapter();
     loggerAdapter.should.exist;
     done();
   });

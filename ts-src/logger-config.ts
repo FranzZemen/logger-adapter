@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {
   AppExecutionContext,
   AppExecutionContextDefaults,
@@ -7,12 +6,10 @@ import {
 import {ExecutionContextDefaults} from '@franzzemen/execution-context';
 import {ModuleDefinition, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
 import Validator, {ValidationError, ValidationSchema} from 'fastest-validator';
-import {createRequire} from 'node:module';
+import _ from 'lodash';
+import moment from 'moment';
 import {isPromise} from 'util/types';
 import {ConsoleLogger} from './console-logger.js';
-const requireModule = createRequire(import.meta.url);
-
-const moment = requireModule('moment');
 
 
 /**
@@ -69,7 +66,7 @@ export enum MessageFormatOption {
 
 // Where are log levels determined?
 export enum LogLevelManagement {
-  Adapter= 'Adapter', // Log level management is driven by the adapter, if possible.
+  Adapter = 'Adapter', // Log level management is driven by the adapter, if possible.
   Native = 'Native', // Log level management is driven by the native implementation, if possible.
   Independent = 'Independent' // Default, log level is driven independently, first by adapter, than by native.  Most restrictive wins.
 }
@@ -99,23 +96,17 @@ export class LogExecutionContextDefaults {
   static DataAsJson = false;
   static LogLevelManagement = LogLevelManagement.Independent;
   static Level = LogLevel.info;
-  static Instance(): Logger {
-    return new ConsoleLogger();
-  }
-
   static InspectOptions: InspectOptions = {
     enabled: LogExecutionContextDefaults.InspectEnabled,
     depth: LogExecutionContextDefaults.InspectDepth,
     showHidden: LogExecutionContextDefaults.ShowHiddenInspectProperties,
     color: LogExecutionContextDefaults.InspectColor
   };
-
   static FormatOptions: FormatOptions = {
     attributes: LogExecutionContextDefaults.AttributesFormatOption,
     message: LogExecutionContextDefaults.MessageFormatOption,
     data: LogExecutionContextDefaults.DataFormatOption
-  }
-
+  };
   static LoggingOptions: LoggingOptions = {
     level: LogExecutionContextDefaults.Level,
     inspectOptions: LogExecutionContextDefaults.InspectOptions,
@@ -133,25 +124,25 @@ export class LogExecutionContextDefaults {
     colorize: LogExecutionContextDefaults.Colorize,
     timestampFormat: LogExecutionContextDefaults.DefaultTimeStampFormat
   };
-
   static OverrideOptions: OverrideOptions = {
     options: LogExecutionContextDefaults.LoggingOptions
   };
-
   static NativeLogger: NativeLogger = {
     logLevelManagement: LogExecutionContextDefaults.LogLevelManagement
-  }
-
+  };
   static Log: Log = {
     options: LogExecutionContextDefaults.LoggingOptions,
     nativeLogger: LogExecutionContextDefaults.NativeLogger
   };
-
   static LogExecutionContext: LogExecutionContext = {
     execution: ExecutionContextDefaults.Execution(),
     app: AppExecutionContextDefaults.App,
     log: LogExecutionContextDefaults.Log
   };
+
+  static Instance(): Logger {
+    return new ConsoleLogger();
+  }
 
 }
 
@@ -167,10 +158,10 @@ export interface InspectOptions {
   // Whether node's inspect method should show hidden attributes.  System default is false
   showHidden?: boolean;
   // Pass color flag to inspect
-  color?: boolean
+  color?: boolean;
 }
 
-export interface  FormatOptions {
+export interface FormatOptions {
   attributes?: AttributesFormatOption,
   message?: MessageFormatOption,
   data?: DataFormatOption
@@ -248,7 +239,7 @@ export interface OverrideOptions {
 export interface NativeLogger {
   module?: ModuleDefinition;
   logLevelManagement?: LogLevelManagement;
-  instance?: Logger
+  instance?: Logger;
 }
 
 export interface Log {
@@ -307,14 +298,14 @@ export const formatOptionsSchema: ValidationSchema = {
     optional: true,
     default: LogExecutionContextDefaults.DataFormatOption
   }
-}
+};
 
 export const formatOptionsSchemaWrapper = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.FormatOptions,
   props: formatOptionsSchema
-}
+};
 
 const systemGenerated = undefined;
 
@@ -424,16 +415,16 @@ export const nativeLoggerSchema: ValidationSchema = {
   },
   instance: {
     type: 'object',
-    optional: true,
+    optional: true
   }
-}
+};
 
 export const nativeLoggerSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.NativeLogger,
   props: nativeLoggerSchema
-}
+};
 
 export const logSchema: ValidationSchema = {
   nativeLogger: nativeLoggerSchemaWrapper,
@@ -443,14 +434,14 @@ export const logSchema: ValidationSchema = {
     optional: true,
     items: overrideOptionsSchemaWrapper
   }
-}
+};
 
 export const logSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.Log,
   props: logSchema
-}
+};
 
 export const logExecutionContextSchema: ValidationSchema = _.merge({
   log: logSchemaWrapper
