@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "main": "./publish/dist/cjs/index.js",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@franzzemen/app-execution-context": "^3.0.3",
-    "@franzzemen/module-factory": "^4.0.3",
+    "@franzzemen/module-factory": "^4.0.4",
     "@types/lodash": "^4.14.188",
     "lodash": "^4.17.21",
     "moment": "^2.29.4"
