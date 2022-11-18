@@ -1,15 +1,15 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "5.0.4",
+  "version": "6.0.0",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
-  "main": "./publish/dist/cjs/index.js",
-  "module": "publish/dist/mjs/index.js",
-  "types": "publish/dist/mjs/index.d.ts",
+  "main": "./publish/cjs/index.js",
+  "module": "publish/mjs/index.js",
+  "types": "publish/mjs/index.d.ts",
   "exports": {
     ".": {
-      "import": "./publish/dist/mjs/index.js",
-      "require": "./publish/dist/cjs/index.js"
+      "import": "./publish/mjs/index.js",
+      "require": "./publish/cjs/index.js"
     }
   },
   "scripts": {
@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/FranzZemen/logger-adapter#readme",
   "devDependencies": {
-    "@franzzemen/gulp-base": "^17.0.11",
+    "@franzzemen/gulp-base": "^18.0.0",
     "@franzzemen/npmu": "^4.0.4",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.0",
@@ -44,8 +44,8 @@
     "typescript": "^4.9.3"
   },
   "dependencies": {
-    "@franzzemen/app-execution-context": "^3.0.4",
-    "@franzzemen/module-factory": "^5.0.1",
+    "@franzzemen/app-execution-context": "^4.0.0",
+    "@franzzemen/module-factory": "^7.0.0",
     "@types/lodash": "^4.14.189",
     "lodash": "^4.17.21",
     "moment": "^2.29.4"
