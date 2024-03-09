@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "exports": {
@@ -40,7 +40,7 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@franzzemen/app-execution-context": "^6.0.0",
+    "@franzzemen/app-execution-context": "^6.0.1",
     "@franzzemen/fastest-validator-wrapper": "^2.0.0",
     "@franzzemen/module-factory": "^9.0.0",
     "@types/lodash": "^4.14.202",

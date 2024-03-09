@@ -1,10 +1,2 @@
 	Undo write to ./out/package.json
 	Undo write to ./out/project/package.json
-	Undo git push manually?
-	Undo git commit as necessary (git revert?)
-	Undo git add * as necessary
-	rollback ./package.json to version 7.0.0 in git
-	Undo git commit as necessary (git revert?)
-	Undo git add * as necessary
-	Undo write to ./out/package.json
-	Undo write to ./out/project/package.json
