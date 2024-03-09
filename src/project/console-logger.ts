@@ -3,9 +3,9 @@ import {Logger, LogLevel} from './index.js';
 
 
 export class ConsoleLogger implements Logger {
-  error(): boolean
-  error(err, data?: any, color?: string);
-  error(err?, data?: any, color: string = FgRed): boolean | void {
+  error(): boolean;
+  error(err: any, data?: any, color?: string): boolean | void;
+  error(err?:any, data?: any, color: string = FgRed): boolean | void {
     if (!err && !data) {
       return true;
     }
@@ -17,8 +17,8 @@ export class ConsoleLogger implements Logger {
   }
 
   warn(): boolean;
-  warn(data, message?: string, color?: string);
-  warn(data?, message?: string, color: string = FgYellow): boolean | void {
+  warn(data: any, message?: string, color?: string): boolean;
+  warn(data?: any, message?: string, color: string = FgYellow): boolean {
     if (!data && !message) {
       return true;
     }
@@ -27,11 +27,12 @@ export class ConsoleLogger implements Logger {
     } else {
       console.warn(color, data);
     }
+    return false;
   }
 
   info(): boolean;
-  info(data, message?: string, color?: string);
-  info(data?, message?: string, color: string = FgGreen): boolean | void {
+  info(data: any, message?: string, color?: string): boolean;
+  info(data?: any, message?: string, color: string = FgGreen): boolean {
     if (!data && !message) {
       return true;
     }
@@ -40,11 +41,12 @@ export class ConsoleLogger implements Logger {
     } else {
       console.info(color, data);
     }
+    return false;
   }
 
   debug(): boolean;
-  debug(data, message?: string, color?: string);
-  debug(data?, message?: string, color: string = FgCyan): boolean | void {
+  debug(data: any, message?: string, color?: string): boolean;
+  debug(data?: any, message?: string, color: string = FgCyan): boolean {
     if (!data && !message) {
       return false;
     }
@@ -53,11 +55,12 @@ export class ConsoleLogger implements Logger {
     } else {
       console.debug(color, data);
     }
+    return false;
   }
 
   trace(): boolean;
-  trace(data, message?: string, color?: string);
-  trace(data?, message?: string, color: string = FgMagenta): boolean | void {
+  trace(data: any, message?: string, color?: string): boolean;
+  trace(data?: any, message?: string, color: string = FgMagenta): boolean {
     if (!data && !message) {
       return true;
     }
@@ -66,6 +69,7 @@ export class ConsoleLogger implements Logger {
     } else {
       console.trace(color, data);
     }
+    return false;
   }
 
   setLevel(logLevel: LogLevel | string) {

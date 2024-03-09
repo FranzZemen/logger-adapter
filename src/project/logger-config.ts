@@ -5,11 +5,12 @@ import {
 } from '@franzzemen/app-execution-context';
 import {ExecutionContextDefaults} from '@franzzemen/execution-context';
 import {ModuleDefinition, moduleDefinitionSchemaWrapper} from '@franzzemen/module-factory';
-import Validator, {ValidationError, ValidationSchema} from 'fastest-validator';
+import {ValidationError, ValidationSchema} from 'fastest-validator';
 import _ from 'lodash';
 import moment from 'moment';
 import {isPromise} from 'util/types';
 import {ConsoleLogger} from './console-logger.js';
+import {getValidator} from "@franzzemen/fastest-validator-wrapper";
 
 
 /**
@@ -18,25 +19,25 @@ import {ConsoleLogger} from './console-logger.js';
 export interface Logger {
   error(): boolean;
 
-  error(err, ...params);
+  error(err: any, ...params: any[]): boolean
 
   warn(): boolean;
 
-  warn(data, message?: string, ...params);
+  warn(data: any, message?: string, ...params: any[]): boolean;
 
   info(): boolean;
 
-  info(data, message?: string, ...params);
+  info(data:any, message?: string, ...params: any[]): boolean;
 
   debug(): boolean;
 
-  debug(data, message?: string, ...params);
+  debug(data: any, message?: string, ...params: any[]): boolean;
 
   trace(): boolean;
 
-  trace(data, message?: string, ...params);
+  trace(data: any, message?: string, ...params: any[]):boolean;
 
-  setLevel(logLevel: LogLevel | string);
+  setLevel(logLevel: LogLevel | string): void;
 }
 
 export enum LogLevel {
@@ -307,7 +308,7 @@ export const formatOptionsSchemaWrapper = {
   props: formatOptionsSchema
 };
 
-const systemGenerated = undefined;
+const systemGenerated: string = '';
 
 export const optionsSchema: ValidationSchema = {
   level: {
@@ -458,10 +459,10 @@ export function isLogExecutionContext(options: any | LogExecutionContext): optio
   return options && 'log' in options; // Faster than validate
 }
 
-const check = (new Validator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
+const check = (getValidator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
 
 export function validate(context: LogExecutionContext): true | ValidationError[] {
-  const result = check(context);
+  const result   = check(context);
   if (isPromise(result)) {
     throw new Error('Unexpected asynchronous on LogExecutionContext validation');
   } else {

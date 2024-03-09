@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/project/index.ts"
+      "types": "./project/types/index.d.ts",
+      "import": "./project/index.js"
     }
   },
   "scripts": {
