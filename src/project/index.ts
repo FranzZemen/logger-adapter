@@ -2,8 +2,7 @@ export * from './logger-config.js';
 export * from './color-constants.js';
 export * from './console-logger.js';
 
-import {App} from '@franzzemen/app-execution-context';
-import {Execution} from '@franzzemen/execution-context';
+import {App, Execution} from '@franzzemen/execution-context';
 import {loadFromModule, ModuleDefinition} from '@franzzemen/module-factory';
 import _ from 'lodash';
 import moment from 'moment';
@@ -106,7 +105,7 @@ export class LoggerAdapter implements Logger {
       repo,
       source,
       method,
-      app: this.ec.app ?? {appContext: ''},
+      app: this.ec.app ?? {name: ''},
       execution: this.ec.execution ?? {thread: '', requestId: '', authorization: ''}
     };
     // Use the console _nativeLogger unless another one is provided, or later loaded by module
@@ -241,7 +240,7 @@ export class LoggerAdapter implements Logger {
     let started = false;
     let result = '';
     if (!this.hideAppContext) {
-      result += `appContext:${this.attributes.app.appContext}`;
+      result += `name:${this.attributes.app.name}`;
       started = true;
     }
     if (!this.hideRepo) {

@@ -1,4 +1,4 @@
-import { AppExecutionContext } from '@franzzemen/app-execution-context';
+import { AppExecutionContext } from '@franzzemen/execution-context';
 import { ModuleDefinition } from '@franzzemen/module-factory';
 import { ValidationError, ValidationSchema } from 'fastest-validator';
 /**

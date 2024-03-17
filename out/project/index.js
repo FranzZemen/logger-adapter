@@ -67,7 +67,7 @@ export class LoggerAdapter {
             repo,
             source,
             method,
-            app: this.ec.app ?? { appContext: '' },
+            app: this.ec.app ?? { name: '' },
             execution: this.ec.execution ?? { thread: '', requestId: '', authorization: '' }
         };
         // Use the console _nativeLogger unless another one is provided, or later loaded by module
@@ -179,7 +179,7 @@ export class LoggerAdapter {
         let started = false;
         let result = '';
         if (!this.hideAppContext) {
-            result += `appContext:${this.attributes.app.appContext}`;
+            result += `name:${this.attributes.app.name}`;
             started = true;
         }
         if (!this.hideRepo) {

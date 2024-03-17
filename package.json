@@ -26,11 +26,11 @@
   },
   "homepage": "https://github.com/FranzZemen/logger-adapter#readme",
   "devDependencies": {
-    "@franzzemen/build-system": "^0.0.53",
+    "@franzzemen/build-system": "^3.0.1",
     "@types/chai": "^4.3.12",
     "@types/mocha": "^10.0.6",
     "@types/moment": "^2.13.0",
-    "@types/node": "^20.11.25",
+    "@types/node": "^20.11.28",
     "chai": "^5.1.0",
     "fastest-validator": "^1.17.0",
     "gulp": "^4.0.2",
@@ -39,10 +39,10 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@franzzemen/app-execution-context": "^6.0.1",
+    "@franzzemen/execution-context": "^5.0.8",
     "@franzzemen/fastest-validator-wrapper": "^2.0.0",
     "@franzzemen/module-factory": "^9.0.0",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.0",
     "lodash": "^4.17.21",
     "moment": "^2.30.1"
   }
