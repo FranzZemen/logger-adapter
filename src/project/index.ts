@@ -1,7 +1,10 @@
-export * from './logger-config.js';
+export * from './log-execution-context.js'
 export * from './color-constants.js';
 export * from './console-logger.js';
+export * from './logger-validation.js';
+export * from './logger.js';
 
+import {Logger, LogLevel} from "./logger.js";
 import {App, Execution} from '@franzzemen/execution-context';
 import {loadFromModule, ModuleDefinition} from '@franzzemen/module-factory';
 import _ from 'lodash';
@@ -16,13 +19,10 @@ import {
   FormatOptions,
   InspectOptions,
   LogExecutionContext,
-  Logger,
-  LoggingOptions,
-  LogLevel,
-  LogLevelManagement,
-  MessageFormatOption, OverrideOptions,
-  validate
-} from './logger-config.js';
+  LoggingOptions, LogLevelManagement, MessageFormatOption, OverrideOptions
+} from "./log-execution-context.js";
+import {validate} from "./logger-validation.js";
+
 
 const utc = moment.utc;
 

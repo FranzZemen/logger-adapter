@@ -1,4 +1,4 @@
-import { Logger, LogLevel } from './index.js';
+import { Logger, LogLevel } from "./logger.js";
 export declare class ConsoleLogger implements Logger {
     error(): boolean;
     error(err: any, data?: any, color?: string): boolean | void;

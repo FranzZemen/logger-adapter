@@ -1,0 +1,23 @@
+import { ValidationError, ValidationSchema } from "fastest-validator";
+import { LogExecutionContext } from "./log-execution-context.js";
+export declare const inspectOptionsSchema: ValidationSchema;
+export declare const inspectOptionsSchemaWrapper: ValidationSchema;
+export declare const formatOptionsSchema: ValidationSchema;
+export declare const formatOptionsSchemaWrapper: {
+    type: string;
+    optional: boolean;
+    default: import("./log-execution-context.js").FormatOptions;
+    props: ValidationSchema;
+};
+export declare const optionsSchema: ValidationSchema;
+export declare const optionsSchemaWrapper: ValidationSchema;
+export declare const overrideOptionsSchema: ValidationSchema;
+export declare const overrideOptionsSchemaWrapper: ValidationSchema;
+export declare const nativeLoggerSchema: ValidationSchema;
+export declare const nativeLoggerSchemaWrapper: ValidationSchema;
+export declare const logSchema: ValidationSchema;
+export declare const logSchemaWrapper: ValidationSchema;
+export declare const logExecutionContextSchema: ValidationSchema;
+export declare const logExecutionContextSchemaWrapper: ValidationSchema;
+export declare function isLogExecutionContext(options: any | LogExecutionContext): options is LogExecutionContext;
+export declare function validate(context: LogExecutionContext): true | ValidationError[];

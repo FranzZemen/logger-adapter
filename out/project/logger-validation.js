@@ -1,113 +1,12 @@
-import { ExecutionContextDefaults, AppExecutionContextDefaults, appExecutionContextSchema } from '@franzzemen/execution-context';
-import { moduleDefinitionSchemaWrapper } from '@franzzemen/module-factory';
-import _ from 'lodash';
-import moment from 'moment';
-import { isPromise } from 'util/types';
-import { ConsoleLogger } from './console-logger.js';
+import moment from "moment/moment.js";
+import { moduleDefinitionSchemaWrapper } from "@franzzemen/module-factory";
+import _ from "lodash";
+import { appExecutionContextSchema } from "@franzzemen/execution-context";
 import { getValidator } from "@franzzemen/fastest-validator-wrapper";
-export var LogLevel;
-(function (LogLevel) {
-    LogLevel["none"] = "none";
-    LogLevel["error"] = "error";
-    LogLevel["warn"] = "warn";
-    LogLevel["info"] = "info";
-    LogLevel["debug"] = "debug";
-    LogLevel["trace"] = "trace";
-})(LogLevel || (LogLevel = {}));
-export var AttributesFormatOption;
-(function (AttributesFormatOption) {
-    AttributesFormatOption["Stringify"] = "Stringify";
-    AttributesFormatOption["Inspect"] = "Inspect";
-    AttributesFormatOption["Augment"] = "Augment";
-})(AttributesFormatOption || (AttributesFormatOption = {}));
-export var DataFormatOption;
-(function (DataFormatOption) {
-    DataFormatOption["Inspect"] = "Inspect";
-    DataFormatOption["Default"] = "Default";
-})(DataFormatOption || (DataFormatOption = {}));
-export var MessageFormatOption;
-(function (MessageFormatOption) {
-    MessageFormatOption["Default"] = "Default";
-    MessageFormatOption["Augment"] = "Augment";
-})(MessageFormatOption || (MessageFormatOption = {}));
-// Where are log levels determined?
-export var LogLevelManagement;
-(function (LogLevelManagement) {
-    LogLevelManagement["Adapter"] = "Adapter";
-    LogLevelManagement["Native"] = "Native";
-    LogLevelManagement["Independent"] = "Independent"; // Default, log level is driven independently, first by adapter, than by native.  Most restrictive wins.
-})(LogLevelManagement || (LogLevelManagement = {}));
-// Default Values
-export class LogExecutionContextDefaults {
-    static InspectEnabled = true;
-    static InspectDepth = 5;
-    static ShowHiddenInspectProperties = false;
-    static InspectColor = true;
-    static AttributesFormatOption = AttributesFormatOption.Augment;
-    static DataFormatOption = DataFormatOption.Default;
-    static MessageFormatOption = MessageFormatOption.Default;
-    static HidePrefix = false;
-    static HideAppContext = false;
-    static HideRepo = false;
-    static HideSourceFile = false;
-    static HideMethod = false;
-    static HideThread = false;
-    static HideRequestId = false;
-    static HideAuthorization = false;
-    static HideTimestamp = false;
-    static HideSeverity = false;
-    static Colorize = true;
-    static DefaultTimeStampFormat = 'YYYY-MM-DD[T]HH:mm:ss.SSS';
-    static DataAsJson = false;
-    static LogLevelManagement = LogLevelManagement.Independent;
-    static Level = LogLevel.info;
-    static InspectOptions = {
-        enabled: LogExecutionContextDefaults.InspectEnabled,
-        depth: LogExecutionContextDefaults.InspectDepth,
-        showHidden: LogExecutionContextDefaults.ShowHiddenInspectProperties,
-        color: LogExecutionContextDefaults.InspectColor
-    };
-    static FormatOptions = {
-        attributes: LogExecutionContextDefaults.AttributesFormatOption,
-        message: LogExecutionContextDefaults.MessageFormatOption,
-        data: LogExecutionContextDefaults.DataFormatOption
-    };
-    static LoggingOptions = {
-        level: LogExecutionContextDefaults.Level,
-        inspectOptions: LogExecutionContextDefaults.InspectOptions,
-        formatOptions: LogExecutionContextDefaults.FormatOptions,
-        hidePrefix: LogExecutionContextDefaults.HidePrefix,
-        hideTimestamp: LogExecutionContextDefaults.HideTimestamp,
-        hideSeverity: LogExecutionContextDefaults.HideSeverity,
-        hideAppContext: LogExecutionContextDefaults.HideAppContext,
-        hideRepo: LogExecutionContextDefaults.HideRepo,
-        hideSourceFile: LogExecutionContextDefaults.HideSourceFile,
-        hideMethod: LogExecutionContextDefaults.HideMethod,
-        hideThread: LogExecutionContextDefaults.HideThread,
-        hideRequestId: LogExecutionContextDefaults.HideRequestId,
-        hideAuthorization: LogExecutionContextDefaults.HideAuthorization,
-        colorize: LogExecutionContextDefaults.Colorize,
-        timestampFormat: LogExecutionContextDefaults.DefaultTimeStampFormat
-    };
-    static OverrideOptions = {
-        options: LogExecutionContextDefaults.LoggingOptions
-    };
-    static NativeLogger = {
-        logLevelManagement: LogExecutionContextDefaults.LogLevelManagement
-    };
-    static Log = {
-        options: LogExecutionContextDefaults.LoggingOptions,
-        nativeLogger: LogExecutionContextDefaults.NativeLogger
-    };
-    static LogExecutionContext = {
-        execution: ExecutionContextDefaults.Execution(),
-        app: AppExecutionContextDefaults.App,
-        log: LogExecutionContextDefaults.Log
-    };
-    static Instance() {
-        return new ConsoleLogger();
-    }
-}
+import { isPromise } from "util/types";
+import { LogExecutionContextDefaults } from "./defaults.js";
+import { LogLevel } from "./logger.js";
+const systemGenerated = '';
 export const inspectOptionsSchema = {
     enabled: {
         type: 'boolean',
@@ -155,7 +54,6 @@ export const formatOptionsSchemaWrapper = {
     default: LogExecutionContextDefaults.FormatOptions,
     props: formatOptionsSchema
 };
-const systemGenerated = '';
 export const optionsSchema = {
     level: {
         type: 'enum',
@@ -307,4 +205,4 @@ export function validate(context) {
         return result;
     }
 }
-//# sourceMappingURL=logger-config.js.map
+//# sourceMappingURL=logger-validation.js.map
