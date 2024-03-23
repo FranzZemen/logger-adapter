@@ -124,7 +124,7 @@ export interface OverrideOptions {
   options?: LoggingOptions;
 }
 
-export interface Log {
+export interface LogConfig {
   // If present, loads the logger implementation pointed to by ModuleDefinition
   nativeLogger?: NativeLogger;
   // Logging options
@@ -135,5 +135,5 @@ export interface Log {
 
 // See configuration object for options
 export interface LogExecutionContext extends AppExecutionContext {
-  log?: Log;
+  logConfig?: LogConfig;
 }

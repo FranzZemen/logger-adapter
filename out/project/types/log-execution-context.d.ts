@@ -78,11 +78,11 @@ export interface OverrideOptions {
     method?: string | string[];
     options?: LoggingOptions;
 }
-export interface Log {
+export interface LogConfig {
     nativeLogger?: NativeLogger;
     options?: LoggingOptions;
     overrides?: OverrideOptions[];
 }
 export interface LogExecutionContext extends AppExecutionContext {
-    log?: Log;
+    logConfig?: LogConfig;
 }

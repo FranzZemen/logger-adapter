@@ -1,4 +1,4 @@
-import { FormatOptions, AttributesFormatOption, DataFormatOption, MessageFormatOption, InspectOptions, LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, Log, LogExecutionContext } from './log-execution-context.js';
+import { FormatOptions, AttributesFormatOption, DataFormatOption, MessageFormatOption, InspectOptions, LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, LogConfig, LogExecutionContext } from './log-execution-context.js';
 import { Logger, LogLevel } from "./logger.js";
 export declare class LogExecutionContextDefaults {
     static InspectEnabled: boolean;
@@ -28,7 +28,7 @@ export declare class LogExecutionContextDefaults {
     static LoggingOptions: LoggingOptions;
     static OverrideOptions: OverrideOptions;
     static NativeLogger: NativeLogger;
-    static Log: Log;
+    static Log: LogConfig;
     static LogExecutionContext: LogExecutionContext;
     static Instance(): Logger;
 }

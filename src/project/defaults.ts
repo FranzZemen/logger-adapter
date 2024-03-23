@@ -10,7 +10,7 @@ import {
   DataFormatOption,
   MessageFormatOption,
   InspectOptions,
-  LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, Log, LogExecutionContext
+  LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, LogConfig, LogExecutionContext
 } from './log-execution-context.js'
 import {Logger, LogLevel} from "./logger.js";
 import {ConsoleLogger} from "./console-logger.js";
@@ -74,14 +74,14 @@ export class LogExecutionContextDefaults {
   static NativeLogger: NativeLogger = {
     logLevelManagement: LogExecutionContextDefaults.LogLevelManagement
   };
-  static Log: Log = {
+  static Log: LogConfig = {
     options: LogExecutionContextDefaults.LoggingOptions,
     nativeLogger: LogExecutionContextDefaults.NativeLogger
   };
   static LogExecutionContext: LogExecutionContext = {
     execution: ExecutionContextDefaults.Execution(),
     app: AppExecutionContextDefaults.App,
-    log: LogExecutionContextDefaults.Log
+    logConfig: LogExecutionContextDefaults.Log
   };
 
   static Instance(): Logger {

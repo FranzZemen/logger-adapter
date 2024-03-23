@@ -52,13 +52,13 @@ export class LoggerAdapter {
         if (!ec.validated) {
             const result = validate(ec);
             if (isPromise(result)) {
-                const localLogger = nativeLogger ? nativeLogger : ec?.log?.nativeLogger?.instance ? ec.log.nativeLogger.instance : new ConsoleLogger();
+                const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
                 const err = new Error('LogExecutionContext validation should not result in async behavior');
                 localLogger.error(err);
                 throw err;
             }
             if (result !== true) {
-                const localLogger = nativeLogger ? nativeLogger : ec?.log?.nativeLogger?.instance ? ec.log.nativeLogger.instance : new ConsoleLogger();
+                const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
                 const msg = 'LogExecutionContext failed validation';
                 localLogger.warn(inspect(result, false, 5), msg);
                 const err = new Error(msg);
@@ -78,18 +78,18 @@ export class LoggerAdapter {
         if (nativeLogger) {
             this._nativeLogger = nativeLogger;
             // Set level based on level management
-            this.setLevel(this.ec.log?.options?.level ?? LogLevel.info);
+            this.setLevel(this.ec.logConfig?.options?.level ?? LogLevel.info);
         }
         else {
-            if (ec.log?.nativeLogger?.instance) {
-                this._nativeLogger = ec.log.nativeLogger.instance;
+            if (ec.logConfig?.nativeLogger?.instance) {
+                this._nativeLogger = ec.logConfig.nativeLogger.instance;
                 // Set level based on level management
-                this.setLevel(this.ec.log?.options?.level ?? LogLevel.info);
+                this.setLevel(this.ec.logConfig?.options?.level ?? LogLevel.info);
             }
             else {
                 this._nativeLogger = new ConsoleLogger();
-                if (this.ec.log?.nativeLogger?.module) {
-                    const module = this.ec?.log?.nativeLogger?.module;
+                if (this.ec.logConfig?.nativeLogger?.module) {
+                    const module = this.ec?.logConfig?.nativeLogger?.module;
                     if (module && module.moduleName && (module.constructorName || module.functionName)) {
                         const implPromise = loadFromModule(module, this._nativeLogger);
                         this.pendingEsLoad = true;
@@ -100,7 +100,7 @@ export class LoggerAdapter {
                             this._nativeLogger = logger;
                             this.pendingEsLoad = false;
                             // Set level based on level management
-                            this.setLevel(this.ec.log?.options?.level ?? LogLevel.info);
+                            this.setLevel(this.ec.logConfig?.options?.level ?? LogLevel.info);
                         });
                     }
                 }
@@ -108,13 +108,13 @@ export class LoggerAdapter {
         }
         this.initializeOverrides();
         // Overrides could have overridden, and need to recalculate
-        this.setLevel(this.ec.log?.options?.level ?? LogLevel.info);
+        this.setLevel(this.ec.logConfig?.options?.level ?? LogLevel.info);
     }
     get nativeLogger() {
         return this._nativeLogger;
     }
     get options() {
-        return this.ec.log?.options ?? {};
+        return this.ec.logConfig?.options ?? {};
     }
     get inspectOptions() {
         return this.options.inspectOptions ?? {};
@@ -282,7 +282,7 @@ export class LoggerAdapter {
         }
     }
     get logLevelManagement() {
-        return this.ec.log?.nativeLogger?.logLevelManagement ?? LogLevelManagement.Adapter;
+        return this.ec.logConfig?.nativeLogger?.logLevelManagement ?? LogLevelManagement.Adapter;
     }
     setLevel(logLevel) {
         this.level = LoggerAdapter.levels.indexOf(logLevel);
@@ -459,7 +459,7 @@ export class LoggerAdapter {
             }
         }
         if (_data) {
-            if (this.ec.log?.options?.dataAsJson) {
+            if (this.ec.logConfig?.options?.dataAsJson) {
                 _data = JSON.stringify(_data);
             }
         }
@@ -494,7 +494,7 @@ export class LoggerAdapter {
         }
     }
     get overrides() {
-        return this.ec.log?.overrides ?? [];
+        return this.ec.logConfig?.overrides ?? [];
     }
     initializeOverrides() {
         // Repos dominates.  If an override matches repo, and doesn't conflict on source or method, use it.
@@ -539,8 +539,8 @@ export class LoggerAdapter {
             }
         });
         if (overrides) {
-            if (this.ec.log) {
-                this.ec.log.options = _.merge(this.ec.log.options, overrides.options) ?? {};
+            if (this.ec.logConfig) {
+                this.ec.logConfig.options = _.merge(this.ec.logConfig.options, overrides.options) ?? {};
             }
         }
     }

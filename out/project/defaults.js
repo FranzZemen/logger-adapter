@@ -71,7 +71,7 @@ export class LogExecutionContextDefaults {
     static LogExecutionContext = {
         execution: ExecutionContextDefaults.Execution(),
         app: AppExecutionContextDefaults.App,
-        log: LogExecutionContextDefaults.Log
+        logConfig: LogExecutionContextDefaults.Log
     };
     static Instance() {
         return new ConsoleLogger();

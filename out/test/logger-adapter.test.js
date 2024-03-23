@@ -8,7 +8,7 @@ let expect = chai.expect;
 describe('logger-adapter tests', () => {
     it('should validate', done => {
         const ec = {
-            log: {
+            logConfig: {
                 options: {
                     level: LogLevel.debug
                 },
@@ -38,7 +38,7 @@ describe('logger-adapter tests', () => {
     });
     it('should log', done => {
         const ec = {
-            log: {
+            logConfig: {
                 options: {
                     level: 'debug'
                 }
@@ -49,7 +49,7 @@ describe('logger-adapter tests', () => {
     });
     it('should log, hiding attributes', done => {
         const ec = {
-            log: {
+            logConfig: {
                 options: {
                     level: 'debug',
                     hideAppContext: true,
@@ -71,7 +71,7 @@ describe('logger-adapter tests', () => {
     });
     it('should log, flattening', done => {
         const execContext = {
-            log: {
+            logConfig: {
                 options: {
                     level: 'debug',
                     formatOptions: {
@@ -87,7 +87,7 @@ describe('logger-adapter tests', () => {
     });
     it('should log, hiding timestamp and severity prefix', done => {
         const execContext = {
-            log: {
+            logConfig: {
                 options: {
                     level: 'debug',
                     hideTimestamp: true,
