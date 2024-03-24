@@ -1,5 +1,5 @@
-import { FormatOptions, AttributesFormatOption, DataFormatOption, MessageFormatOption, InspectOptions, LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, LogConfig, LogExecutionContext } from './log-execution-context.js';
-import { Logger, LogLevel } from "./logger.js";
+import { FormatOptions, AttributesFormatOption, DataFormatOption, MessageFormatOption, InspectOptions, LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, LogConfig, LogExecutionContext } from '../log-context/log-execution-context.js';
+import { Logger, LogLevel } from "../logger.js";
 export declare class LogExecutionContextDefaults {
     static InspectEnabled: boolean;
     static InspectDepth: number;

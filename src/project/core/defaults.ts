@@ -11,9 +11,9 @@ import {
   MessageFormatOption,
   InspectOptions,
   LogLevelManagement, LoggingOptions, OverrideOptions, NativeLogger, LogConfig, LogExecutionContext
-} from './log-execution-context.js'
-import {Logger, LogLevel} from "./logger.js";
-import {ConsoleLogger} from "./console-logger.js";
+} from '../log-context/log-execution-context.js'
+import {Logger, LogLevel} from "../logger.js";
+import {ConsoleLogger} from "../console/console-logger.js";
 
 // Default Values
 export class LogExecutionContextDefaults {

@@ -3,9 +3,9 @@ Created by Franz Zemen 03/22/2024
 License Type: MIT
 */
 import { ExecutionContextDefaults, AppExecutionContextDefaults } from "@franzzemen/execution-context";
-import { AttributesFormatOption, DataFormatOption, MessageFormatOption, LogLevelManagement } from './log-execution-context.js';
-import { LogLevel } from "./logger.js";
-import { ConsoleLogger } from "./console-logger.js";
+import { AttributesFormatOption, DataFormatOption, MessageFormatOption, LogLevelManagement } from '../log-context/log-execution-context.js';
+import { LogLevel } from "../logger.js";
+import { ConsoleLogger } from "../console/console-logger.js";
 // Default Values
 export class LogExecutionContextDefaults {
     static InspectEnabled = true;

@@ -1,8 +1,8 @@
 import moment from "moment/moment.js";
 import { moduleDefinitionSchemaWrapper } from "@franzzemen/module-factory";
 import { appExecutionContextSchema, getSyncCheckFunction } from "@franzzemen/execution-context";
-import { LogExecutionContextDefaults } from "./defaults.js";
-import { LogLevel } from "./logger.js";
+import { LogExecutionContextDefaults } from "../core/defaults.js";
+import { LogLevel } from "../logger.js";
 const systemGenerated = '';
 const inspectOptionsSchema = {
     enabled: {

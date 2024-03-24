@@ -1,6 +1,6 @@
 import { AppExecutionContext } from '@franzzemen/execution-context';
 import { ModuleDefinition } from "@franzzemen/module-factory";
-import { Logger, LogLevel } from "./logger.js";
+import { Logger, LogLevel } from "../logger.js";
 export declare enum LogLevelManagement {
     Adapter = "Adapter",// Log level management is driven by the adapter, if possible.
     Native = "Native",// Log level management is driven by the native implementation, if possible.

@@ -1,4 +1,4 @@
-import { FgCyan, FgGreen, FgMagenta, FgRed, FgYellow } from './color-constants.js';
+import { FgCyan, FgGreen, FgMagenta, FgRed, FgYellow } from './colors.js';
 export class ConsoleLogger {
     error(err, data, color = FgRed) {
         if (!err && !data) {

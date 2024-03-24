@@ -1,5 +1,5 @@
-import { Logger, LogLevel } from "./logger.js";
-import { AttributesFormatOption, DataFormatOption, FormatOptions, InspectOptions, LogExecutionContext, LoggingOptions, LogLevelManagement, MessageFormatOption } from "./log-execution-context.js";
+import { Logger, LogLevel } from "../logger.js";
+import { AttributesFormatOption, DataFormatOption, FormatOptions, InspectOptions, LogExecutionContext, LoggingOptions, LogLevelManagement, MessageFormatOption } from "../log-context/log-execution-context.js";
 export declare class LoggerAdapter implements Logger {
     protected static _noLogging: number;
     protected static _error: number;

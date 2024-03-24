@@ -3,22 +3,22 @@ Created by Franz Zemen 03/24/2024
 License Type: MIT
 */
 
-import {Logger, LogLevel} from "./logger.js";
+import {Logger, LogLevel} from "../logger.js";
 import {
   AttributesFormatOption, DataFormatOption,
   FormatOptions,
   InspectOptions,
   LogExecutionContext,
   LoggingOptions, LogLevelManagement, MessageFormatOption, OverrideOptions
-} from "./log-execution-context.js";
-import {validateLogExecutionContext} from "./validation.js";
-import {isPromise} from "util/types";
-import {ConsoleLogger} from "./console-logger.js";
-import {inspect} from "util";
+} from "../log-context/log-execution-context.js";
+import {validateLogExecutionContext} from "../log-context/validation.js";
+import {ConsoleLogger} from "../console/console-logger.js";
 import {loadFromModule, ModuleDefinition} from "@franzzemen/module-factory";
-import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from "./color-constants.js";
+import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from "../console/colors.js";
 import {App, Execution} from "@franzzemen/execution-context";
 import moment from 'moment';
+import {inspect} from "node:util";
+import {isPromise} from "node:util/types";
 
 const utc = moment.utc;
 

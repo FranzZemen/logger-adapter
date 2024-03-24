@@ -1,5 +1,5 @@
-import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from './color-constants.js';
-import {Logger, LogLevel} from "./logger.js";
+import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from './colors.js';
+import {Logger, LogLevel} from "../logger.js";
 
 export class ConsoleLogger implements Logger {
   error(): boolean;

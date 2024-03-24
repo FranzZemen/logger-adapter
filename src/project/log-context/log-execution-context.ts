@@ -5,7 +5,7 @@ License Type: MIT
 
 import { AppExecutionContext } from '@franzzemen/execution-context';
 import {ModuleDefinition} from "@franzzemen/module-factory";
-import {Logger, LogLevel} from "./logger.js";
+import {Logger, LogLevel} from "../logger.js";
 
 
 // Where are log levels determined?

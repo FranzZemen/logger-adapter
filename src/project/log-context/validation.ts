@@ -10,8 +10,8 @@ import {appExecutionContextSchema, getSyncCheckFunction, isSyncCheckFunction} fr
 import {getValidator} from "@franzzemen/fastest-validator-wrapper";
 import {isPromise} from "util/types";
 import {LogExecutionContext, OverrideOptions} from "./log-execution-context.js";
-import {LogExecutionContextDefaults} from "./defaults.js";
-import {LogLevel} from "./logger.js";
+import {LogExecutionContextDefaults} from "../core/defaults.js";
+import {LogLevel} from "../logger.js";
 
 const systemGenerated: string = '';
 
@@ -213,7 +213,7 @@ export function isLogExecutionContext(options: any | LogExecutionContext): optio
 }
 
 const check: SyncCheckFunction = getSyncCheckFunction(logExecutionContextSchema);
-  
+
 export function validateLogExecutionContext(context: LogExecutionContext): true | ValidationError[] {
   const result = check(context);
   if (result === true) {
