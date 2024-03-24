@@ -6,8 +6,7 @@ import {
   LoggerAdapter,
   LogLevel,
   LogLevelManagement,
-  validate
-  // @ts-ignore
+  validateLogExecutionContext as validate
 } from '@franzzemen/logger-adapter';
 
 let should = chai.should();
@@ -16,6 +15,9 @@ let expect = chai.expect;
 describe('logger-adapter tests', () => {
   it('should validate', done => {
     const ec: LogExecutionContext = {
+      app: {
+        name: 'test'
+      },
       logConfig: {
         options: {
           level: LogLevel.debug
@@ -40,12 +42,15 @@ describe('logger-adapter tests', () => {
     };
     const result = validate(ec);
     result.should.be.true;
-    const loggerAdapter: LoggerAdapter = new LoggerAdapter();
+    const loggerAdapter: LoggerAdapter = new LoggerAdapter({app: {name: 'test'},logConfig: {options: {level: 'debug'}}});
     loggerAdapter.should.exist;
     done();
   });
   it('should log', done => {
     const ec: LogExecutionContext = {
+      app: {
+        name: 'test'
+      },
       logConfig: {
         options: {
           level: 'debug'
@@ -58,6 +63,9 @@ describe('logger-adapter tests', () => {
   });
   it('should log, hiding attributes', done => {
     const ec: LogExecutionContext = {
+      app: {
+        name: 'test'
+      },
       logConfig: {
         options: {
           level: 'debug',
@@ -80,6 +88,9 @@ describe('logger-adapter tests', () => {
   });
   it('should log, flattening', done => {
     const execContext: LogExecutionContext = {
+      app: {
+        name: 'test'
+      },
       logConfig: {
         options: {
           level: 'debug',
@@ -96,6 +107,9 @@ describe('logger-adapter tests', () => {
   });
   it('should log, hiding timestamp and severity prefix', done => {
     const execContext: LogExecutionContext = {
+      app: {
+        name: 'test'
+      },
       logConfig: {
         options: {
           level: 'debug',

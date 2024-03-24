@@ -1,13 +1,14 @@
 import * as chai from 'chai';
 import 'mocha';
-import { AttributesFormatOption, LoggerAdapter, LogLevel, LogLevelManagement, validate
-// @ts-ignore
- } from '@franzzemen/logger-adapter';
+import { AttributesFormatOption, LoggerAdapter, LogLevel, LogLevelManagement, validateLogExecutionContext as validate } from '@franzzemen/logger-adapter';
 let should = chai.should();
 let expect = chai.expect;
 describe('logger-adapter tests', () => {
     it('should validate', done => {
         const ec = {
+            app: {
+                name: 'test'
+            },
             logConfig: {
                 options: {
                     level: LogLevel.debug
@@ -32,12 +33,15 @@ describe('logger-adapter tests', () => {
         };
         const result = validate(ec);
         result.should.be.true;
-        const loggerAdapter = new LoggerAdapter();
+        const loggerAdapter = new LoggerAdapter({ app: { name: 'test' }, logConfig: { options: { level: 'debug' } } });
         loggerAdapter.should.exist;
         done();
     });
     it('should log', done => {
         const ec = {
+            app: {
+                name: 'test'
+            },
             logConfig: {
                 options: {
                     level: 'debug'
@@ -49,6 +53,9 @@ describe('logger-adapter tests', () => {
     });
     it('should log, hiding attributes', done => {
         const ec = {
+            app: {
+                name: 'test'
+            },
             logConfig: {
                 options: {
                     level: 'debug',
@@ -71,6 +78,9 @@ describe('logger-adapter tests', () => {
     });
     it('should log, flattening', done => {
         const execContext = {
+            app: {
+                name: 'test'
+            },
             logConfig: {
                 options: {
                     level: 'debug',
@@ -87,6 +97,9 @@ describe('logger-adapter tests', () => {
     });
     it('should log, hiding timestamp and severity prefix', done => {
         const execContext = {
+            app: {
+                name: 'test'
+            },
             logConfig: {
                 options: {
                     level: 'debug',

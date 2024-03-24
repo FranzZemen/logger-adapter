@@ -15,7 +15,7 @@ export enum LogLevelManagement {
   Independent = 'Independent' // Default, log level is driven independently, first by adapter, than by native.  Most restrictive wins.
 }
 
-export interface NativeLogger {
+export type NativeLogger = {
   module?: ModuleDefinition;
   logLevelManagement?: LogLevelManagement;
   instance?: Logger;
@@ -24,7 +24,7 @@ export interface NativeLogger {
 /**
  * Determines inspect() behavior
  */
-export interface InspectOptions {
+export type InspectOptions = {
   // Object inspection will be enabled.  System default is true
   enabled?: boolean;
   // The object depth to log when logging object properties using inspect().  System default is 5
@@ -51,7 +51,7 @@ export enum MessageFormatOption {
   Augment = 'Augment'
 }
 
-export interface FormatOptions {
+export type FormatOptions = {
   attributes?: AttributesFormatOption,
   message?: MessageFormatOption,
   data?: DataFormatOption
@@ -60,7 +60,7 @@ export interface FormatOptions {
 /**
  * Determines behavior what is actually logged
  */
-export interface LoggingOptions {
+export type LoggingOptions = {
   // The log level to log.  Available levels are 'none', 'error', 'warn','info', 'debug' and 'trace' or one of LogLevel enum.  Default is LogLevel.info
   level?: LogLevel | string;
   // How inspect() behaves
@@ -110,7 +110,7 @@ export interface LoggingOptions {
  *    5. no repo and matching source
  *    6. no repo or source and matching method
  */
-export interface OverrideOptions {
+export type OverrideOptions = {
   // The repo to override logging for. If set, further constrains on the configured source, independent of source or method.
   // repo can be an array of repos
   repo?: string | string[];
@@ -124,7 +124,7 @@ export interface OverrideOptions {
   options?: LoggingOptions;
 }
 
-export interface LogConfig {
+export type LogConfig = {
   // If present, loads the logger implementation pointed to by ModuleDefinition
   nativeLogger?: NativeLogger;
   // Logging options
@@ -134,6 +134,6 @@ export interface LogConfig {
 }
 
 // See configuration object for options
-export interface LogExecutionContext extends AppExecutionContext {
+export type LogExecutionContext = AppExecutionContext & {
   logConfig?: LogConfig;
 }

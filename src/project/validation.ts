@@ -2,11 +2,11 @@
 Created by Franz Zemen 03/22/2024
 License Type: MIT
 */
-import {ValidationError, ValidationSchema} from "fastest-validator";
+import {SyncCheckFunction, ValidationError, ValidationSchema} from "fastest-validator";
 import moment from "moment/moment.js";
 import {moduleDefinitionSchemaWrapper} from "@franzzemen/module-factory";
 import _ from "lodash";
-import {appExecutionContextSchema} from "@franzzemen/execution-context";
+import {appExecutionContextSchema, isSyncCheckFunction} from "@franzzemen/execution-context";
 import {getValidator} from "@franzzemen/fastest-validator-wrapper";
 import {isPromise} from "util/types";
 import {LogExecutionContext, OverrideOptions} from "./log-execution-context.js";
@@ -15,7 +15,7 @@ import {LogLevel} from "./logger.js";
 
 const systemGenerated: string = '';
 
-export const inspectOptionsSchema: ValidationSchema = {
+const inspectOptionsSchema: ValidationSchema = {
   enabled: {
     type: 'boolean',
     default: LogExecutionContextDefaults.InspectEnabled
@@ -40,7 +40,7 @@ export const inspectOptionsSchemaWrapper: ValidationSchema = {
   props: inspectOptionsSchema
 };
 
-export const formatOptionsSchema: ValidationSchema = {
+const formatOptionsSchema: ValidationSchema = {
   attributes: {
     type: 'string',
     optional: true,
@@ -58,14 +58,14 @@ export const formatOptionsSchema: ValidationSchema = {
   }
 };
 
-export const formatOptionsSchemaWrapper = {
+const formatOptionsSchemaWrapper = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.FormatOptions,
   props: formatOptionsSchema
 };
 
-export const optionsSchema: ValidationSchema = {
+const optionsSchema: ValidationSchema = {
   level: {
     type: 'enum',
     values: ['none', 'error', 'warn', 'info', 'debug', 'trace'],
@@ -102,13 +102,13 @@ export const optionsSchema: ValidationSchema = {
   }
 };
 
-export const optionsSchemaWrapper: ValidationSchema = {
+const optionsSchemaWrapper: ValidationSchema = {
   type: 'object',
   default: LogExecutionContextDefaults.LoggingOptions,
   props: optionsSchema
 };
 
-export const overrideOptionsSchema: ValidationSchema = {
+const overrideOptionsSchema: ValidationSchema = {
   repo: [{
     type: 'string',
     optional: true
@@ -143,7 +143,7 @@ export const overrideOptionsSchema: ValidationSchema = {
   options: optionsSchemaWrapper
 };
 
-export const overrideOptionsSchemaWrapper: ValidationSchema = {
+const overrideOptionsSchemaWrapper: ValidationSchema = {
   type: 'object',
   default: LogExecutionContextDefaults.OverrideOptions,
   custom: (value: OverrideOptions, errors: ValidationError[]) => {
@@ -162,7 +162,7 @@ export const overrideOptionsSchemaWrapper: ValidationSchema = {
   props: overrideOptionsSchema
 };
 
-export const nativeLoggerSchema: ValidationSchema = {
+const nativeLoggerSchema: ValidationSchema = {
   module: moduleDefinitionSchemaWrapper,
   logLevelManagement: {
     type: 'string',
@@ -175,14 +175,14 @@ export const nativeLoggerSchema: ValidationSchema = {
   }
 };
 
-export const nativeLoggerSchemaWrapper: ValidationSchema = {
+const nativeLoggerSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.NativeLogger,
   props: nativeLoggerSchema
 };
 
-export const logSchema: ValidationSchema = {
+const logSchema: ValidationSchema = {
   nativeLogger: nativeLoggerSchemaWrapper,
   options: optionsSchemaWrapper,
   overrides: {
@@ -192,16 +192,14 @@ export const logSchema: ValidationSchema = {
   }
 };
 
-export const logSchemaWrapper: ValidationSchema = {
+const logSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.Log,
   props: logSchema
 };
 
-export const logExecutionContextSchema: ValidationSchema = _.merge({
-                                                                     log: logSchemaWrapper
-                                                                   }, appExecutionContextSchema);
+export const logExecutionContextSchema: ValidationSchema = {...{log: logSchemaWrapper}, ...appExecutionContextSchema};
 
 export const logExecutionContextSchemaWrapper: ValidationSchema = {
   type: 'object',
@@ -214,16 +212,19 @@ export function isLogExecutionContext(options: any | LogExecutionContext): optio
   return options && 'log' in options; // Faster than validate
 }
 
-const check = (getValidator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
-
-export function validate(context: LogExecutionContext): true | ValidationError[] {
-  const result   = check(context);
-  if (isPromise(result)) {
-    throw new Error('Unexpected asynchronous on LogExecutionContext validation');
+const check: SyncCheckFunction = (() => {
+  const interimCheck = (getValidator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
+  if (isSyncCheckFunction(interimCheck)) {
+    return interimCheck;
   } else {
-    if (result === true) {
-      context.validated = true;
-    }
-    return result;
+    throw new Error('Unexpected asynchronous on LogExecutionContext validation');
   }
+})();
+
+export function validateLogExecutionContext(context: LogExecutionContext): true | ValidationError[] {
+  const result = check(context);
+  if (result === true) {
+    context.validated = true;
+  }
+  return result;
 }

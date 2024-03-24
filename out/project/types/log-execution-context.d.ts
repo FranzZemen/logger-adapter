@@ -6,20 +6,20 @@ export declare enum LogLevelManagement {
     Native = "Native",// Log level management is driven by the native implementation, if possible.
     Independent = "Independent"
 }
-export interface NativeLogger {
+export type NativeLogger = {
     module?: ModuleDefinition;
     logLevelManagement?: LogLevelManagement;
     instance?: Logger;
-}
+};
 /**
  * Determines inspect() behavior
  */
-export interface InspectOptions {
+export type InspectOptions = {
     enabled?: boolean;
     depth?: number;
     showHidden?: boolean;
     color?: boolean;
-}
+};
 export declare enum AttributesFormatOption {
     Stringify = "Stringify",
     Inspect = "Inspect",
@@ -33,15 +33,15 @@ export declare enum MessageFormatOption {
     Default = "Default",
     Augment = "Augment"
 }
-export interface FormatOptions {
+export type FormatOptions = {
     attributes?: AttributesFormatOption;
     message?: MessageFormatOption;
     data?: DataFormatOption;
-}
+};
 /**
  * Determines behavior what is actually logged
  */
-export interface LoggingOptions {
+export type LoggingOptions = {
     level?: LogLevel | string;
     inspectOptions?: InspectOptions;
     formatOptions?: FormatOptions;
@@ -58,7 +58,7 @@ export interface LoggingOptions {
     colorize?: boolean;
     timestampFormat?: string;
     dataAsJson?: boolean;
-}
+};
 /**
  * Overrides to logging options, which can be specified by any combination of repo, source and/or method.  At least one
  * must be defined.  If more than one override matches, the most specific one (repo, source, method defined) is merged into the others, in order of
@@ -72,17 +72,17 @@ export interface LoggingOptions {
  *    5. no repo and matching source
  *    6. no repo or source and matching method
  */
-export interface OverrideOptions {
+export type OverrideOptions = {
     repo?: string | string[];
     source?: string | string[];
     method?: string | string[];
     options?: LoggingOptions;
-}
-export interface LogConfig {
+};
+export type LogConfig = {
     nativeLogger?: NativeLogger;
     options?: LoggingOptions;
     overrides?: OverrideOptions[];
-}
-export interface LogExecutionContext extends AppExecutionContext {
+};
+export type LogExecutionContext = AppExecutionContext & {
     logConfig?: LogConfig;
-}
+};
