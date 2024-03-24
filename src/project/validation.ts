@@ -6,7 +6,7 @@ import {SyncCheckFunction, ValidationError, ValidationSchema} from "fastest-vali
 import moment from "moment/moment.js";
 import {moduleDefinitionSchemaWrapper} from "@franzzemen/module-factory";
 import _ from "lodash";
-import {appExecutionContextSchema, isSyncCheckFunction} from "@franzzemen/execution-context";
+import {appExecutionContextSchema, getSyncCheckFunction, isSyncCheckFunction} from "@franzzemen/execution-context";
 import {getValidator} from "@franzzemen/fastest-validator-wrapper";
 import {isPromise} from "util/types";
 import {LogExecutionContext, OverrideOptions} from "./log-execution-context.js";
@@ -212,15 +212,8 @@ export function isLogExecutionContext(options: any | LogExecutionContext): optio
   return options && 'log' in options; // Faster than validate
 }
 
-const check: SyncCheckFunction = (() => {
-  const interimCheck = (getValidator({useNewCustomCheckerFunction: true})).compile(logExecutionContextSchema);
-  if (isSyncCheckFunction(interimCheck)) {
-    return interimCheck;
-  } else {
-    throw new Error('Unexpected asynchronous on LogExecutionContext validation');
-  }
-})();
-
+const check: SyncCheckFunction = getSyncCheckFunction(logExecutionContextSchema);
+  
 export function validateLogExecutionContext(context: LogExecutionContext): true | ValidationError[] {
   const result = check(context);
   if (result === true) {

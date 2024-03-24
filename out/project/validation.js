@@ -1,7 +1,6 @@
 import moment from "moment/moment.js";
 import { moduleDefinitionSchemaWrapper } from "@franzzemen/module-factory";
-import { appExecutionContextSchema, isSyncCheckFunction } from "@franzzemen/execution-context";
-import { getValidator } from "@franzzemen/fastest-validator-wrapper";
+import { appExecutionContextSchema, getSyncCheckFunction } from "@franzzemen/execution-context";
 import { LogExecutionContextDefaults } from "./defaults.js";
 import { LogLevel } from "./logger.js";
 const systemGenerated = '';
@@ -188,15 +187,7 @@ export const logExecutionContextSchemaWrapper = {
 export function isLogExecutionContext(options) {
     return options && 'log' in options; // Faster than validate
 }
-const check = (() => {
-    const interimCheck = (getValidator({ useNewCustomCheckerFunction: true })).compile(logExecutionContextSchema);
-    if (isSyncCheckFunction(interimCheck)) {
-        return interimCheck;
-    }
-    else {
-        throw new Error('Unexpected asynchronous on LogExecutionContext validation');
-    }
-})();
+const check = getSyncCheckFunction(logExecutionContextSchema);
 export function validateLogExecutionContext(context) {
     const result = check(context);
     if (result === true) {
