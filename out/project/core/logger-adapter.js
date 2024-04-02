@@ -226,11 +226,11 @@ export class LoggerAdapter {
     warn(data, message, color = FgYellow) {
         if (data && this.isWarnEnabled()) {
             const logResult = this.log(data, message, color, 'WARN:');
-            if (logResult.message) {
+            if (logResult.data && logResult.message) {
                 this._nativeLogger.warn(logResult.data, logResult.message);
             }
-            else {
-                this._nativeLogger.warn(logResult.data);
+            else if (logResult.data || logResult.message) {
+                this._nativeLogger.warn(logResult.data ?? logResult.message);
             }
         }
         else {
@@ -240,11 +240,11 @@ export class LoggerAdapter {
     info(data, message, color = FgGreen) {
         if (data && this.isInfoEnabled()) {
             const logResult = this.log(data, message, color, 'INFO:');
-            if (logResult.message) {
+            if (logResult.data && logResult.message) {
                 this._nativeLogger.info(logResult.data, logResult.message);
             }
-            else {
-                this._nativeLogger.info(logResult.data);
+            else if (logResult.data || logResult.message) {
+                this._nativeLogger.info(logResult.data ?? logResult.message);
             }
         }
         else {
@@ -254,11 +254,11 @@ export class LoggerAdapter {
     debug(data, message, color = FgCyan) {
         if (data && this.isDebugEnabled()) {
             const logResult = this.log(data, message, color, 'DEBUG:');
-            if (logResult.message) {
+            if (logResult.data && logResult.message) {
                 this._nativeLogger.debug(logResult.data, logResult.message);
             }
-            else {
-                this._nativeLogger.debug(logResult.data);
+            else if (logResult.data || logResult.message) {
+                this._nativeLogger.debug(logResult.data ?? logResult.message);
             }
         }
         else {
@@ -268,11 +268,11 @@ export class LoggerAdapter {
     trace(data, message, color = FgMagenta) {
         if (data && this.isTracingEnabled()) {
             const logResult = this.log(data, message, color, 'TRACE:');
-            if (logResult.message) {
+            if (logResult.data && logResult.message) {
                 this._nativeLogger.trace(logResult.data, logResult.message);
             }
-            else {
-                this._nativeLogger.trace(logResult.data);
+            else if (logResult.data || logResult.message) {
+                this._nativeLogger.trace(logResult.data ?? logResult.message);
             }
         }
         else {

@@ -287,10 +287,10 @@ export class LoggerAdapter implements Logger {
   warn(data?: any, message?: string, color: string = FgYellow): boolean | void {
     if (data && this.isWarnEnabled()) {
       const logResult = this.log(data, message, color, 'WARN:');
-      if (logResult.message) {
+      if (logResult.data && logResult.message) {
         this._nativeLogger.warn(logResult.data, logResult.message);
-      } else {
-        this._nativeLogger.warn(logResult.data);
+      } else if (logResult.data || logResult.message) {
+        this._nativeLogger.warn(logResult.data??logResult.message);
       }
     } else {
       return this.isWarnEnabled();
@@ -302,10 +302,10 @@ export class LoggerAdapter implements Logger {
   info(data?: any, message?: string, color: string = FgGreen): boolean | void {
     if (data && this.isInfoEnabled()) {
       const logResult = this.log(data, message, color, 'INFO:');
-      if (logResult.message) {
+      if (logResult.data && logResult.message) {
         this._nativeLogger.info(logResult.data, logResult.message);
-      } else {
-        this._nativeLogger.info(logResult.data);
+      } else if (logResult.data || logResult.message) {
+        this._nativeLogger.info(logResult.data??logResult.message);
       }
     } else {
       return this.isInfoEnabled();
@@ -317,10 +317,10 @@ export class LoggerAdapter implements Logger {
   debug(data?: any, message?: string, color: string = FgCyan): boolean | void {
     if (data && this.isDebugEnabled()) {
       const logResult = this.log(data, message, color, 'DEBUG:');
-      if (logResult.message) {
+      if (logResult.data && logResult.message) {
         this._nativeLogger.debug(logResult.data, logResult.message);
-      } else {
-        this._nativeLogger.debug(logResult.data);
+      } else if (logResult.data || logResult.message) {
+        this._nativeLogger.debug(logResult.data?? logResult.message);
       }
     } else {
       return this.isDebugEnabled();
@@ -332,10 +332,10 @@ export class LoggerAdapter implements Logger {
   trace(data?: any, message?: string, color: string = FgMagenta): boolean | void {
     if (data && this.isTracingEnabled()) {
       const logResult = this.log(data, message, color, 'TRACE:');
-      if (logResult.message) {
+      if (logResult.data && logResult.message) {
         this._nativeLogger.trace(logResult.data, logResult.message);
-      } else {
-        this._nativeLogger.trace(logResult.data);
+      } else if (logResult.data || logResult.message) {
+        this._nativeLogger.trace(logResult.data?? logResult.message);
       }
     } else {
       return this.isTracingEnabled();
