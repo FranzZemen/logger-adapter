@@ -423,16 +423,19 @@ export class LoggerAdapter {
             return undefined;
         }
     }
-    processData(data, message) {
+    processData(data, inputMessage) {
         let _data;
-        if (message && this.messageFormat === MessageFormatOption.Augment) {
+        if (inputMessage && this.messageFormat === MessageFormatOption.Augment) {
             if (data && typeof data !== 'object') {
-                message = `${message} - ${data}`;
+                inputMessage = `${inputMessage} - ${data}`;
             }
-            _data = { message };
+            _data = { message: inputMessage };
         }
         else if (data) {
-            if (typeof data !== 'object') {
+            if (typeof data === 'string') {
+                // Do nothing - processMessage already handled it
+            }
+            else if (typeof data !== 'object') {
                 _data = { message: data };
             }
         }
