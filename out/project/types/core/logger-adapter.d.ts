@@ -54,6 +54,7 @@ export declare class LoggerAdapter implements Logger {
     error(err: unknown, data?: any, color?: string): void;
     warn(): boolean;
     warn(data: any, message?: string, color?: string): void;
+    out(message: string, color?: string): void;
     info(): boolean;
     info(data: any, message?: string, color?: string): void;
     debug(): boolean;

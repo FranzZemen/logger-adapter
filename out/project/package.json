@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "10.0.3",
+  "version": "10.0.4",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "exports": {
@@ -28,20 +28,20 @@
   "homepage": "https://github.com/FranzZemen/logger-adapter#readme",
   "devDependencies": {
     "@franzzemen/build-system": "^4.1.0",
-    "@types/chai": "^4.3.14",
+    "@types/chai": "^4.3.16",
     "@types/mocha": "^10.0.6",
     "@types/moment": "^2.13.0",
-    "@types/node": "^20.12.2",
+    "@types/node": "^20.12.8",
     "chai": "^5.1.0",
     "mocha": "^10.4.0",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "@franzzemen/execution-context": "^7.0.3",
     "@franzzemen/fastest-validator-wrapper": "^2.0.1",
     "@franzzemen/module-factory": "^9.0.0",
-    "@types/lodash": "^4.17.0",
-    "fastest-validator": "^1.17.0",
+    "@types/lodash": "^4.17.1",
+    "fastest-validator": "^1.18.0",
     "lodash": "^4.17.21",
     "moment": "^2.30.1"
   }
