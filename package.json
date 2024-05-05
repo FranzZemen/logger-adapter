@@ -1,6 +1,6 @@
 {
   "name": "@franzzemen/logger-adapter",
-  "version": "10.1.2",
+  "version": "10.1.3",
   "description": "A logger for @franzzemen projects that can use any logger implementation",
   "type": "module",
   "exports": {
