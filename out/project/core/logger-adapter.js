@@ -240,7 +240,7 @@ export class LoggerAdapter {
     out(message, color = FgCyan) {
         const currentHidePrefix = this.hidePrefix;
         this.options.hidePrefix = true;
-        this.info(undefined, message, color);
+        this.info(message, color);
         this.options.hidePrefix = currentHidePrefix;
     }
     info(data, message, color = FgGreen) {

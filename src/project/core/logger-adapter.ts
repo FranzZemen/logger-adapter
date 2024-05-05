@@ -300,7 +300,7 @@ export class LoggerAdapter implements Logger {
   out(message: string, color: string = FgCyan): void {
     const currentHidePrefix = this.hidePrefix;
     this.options.hidePrefix = true;
-    this.info(undefined, message, color);
+    this.info(message, color);
     this.options.hidePrefix = currentHidePrefix;
   }
 
