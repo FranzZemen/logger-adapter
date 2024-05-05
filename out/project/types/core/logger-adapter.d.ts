@@ -1,5 +1,5 @@
-import { Logger, LogLevel } from "../logger.js";
-import { AttributesFormatOption, DataFormatOption, FormatOptions, InspectOptions, LogExecutionContext, LoggingOptions, LogLevelManagement, MessageFormatOption } from "../log-context/log-execution-context.js";
+import { Logger, LogLevel } from '../logger.js';
+import { AttributesFormatOption, DataFormatOption, FormatOptions, InspectOptions, LogExecutionContext, LoggingOptions, LogLevelManagement, MessageFormatOption } from '../log-context/log-execution-context.js';
 export declare class LoggerAdapter implements Logger {
     protected static _noLogging: number;
     protected static _error: number;
@@ -15,7 +15,6 @@ export declare class LoggerAdapter implements Logger {
     private start;
     private interim;
     private attributes;
-    private _nativeLogger;
     /**
      * All parameters optional.
      * @param ec The context. It will default to LogDefaults.
@@ -25,6 +24,7 @@ export declare class LoggerAdapter implements Logger {
      * @param nativeLogger  If passed, will use this over the native _nativeLogger or a module definition
      */
     constructor(ec: LogExecutionContext, repo?: string, source?: string, method?: string, nativeLogger?: Logger);
+    private _nativeLogger;
     get nativeLogger(): Logger;
     get options(): LoggingOptions;
     get inspectOptions(): InspectOptions;
@@ -48,7 +48,9 @@ export declare class LoggerAdapter implements Logger {
     get dataFormat(): DataFormatOption;
     get messageFormat(): MessageFormatOption;
     get colorize(): boolean;
+    get logLevelManagement(): LogLevelManagement;
     private get attributesAsString();
+    private get overrides();
     setMethod(_method: string): LoggerAdapter;
     error(): boolean;
     error(err: unknown, data?: any, color?: string): void;
@@ -61,7 +63,6 @@ export declare class LoggerAdapter implements Logger {
     debug(data: any, message?: string, color?: string): void;
     trace(): boolean;
     trace(data: any, message?: string, color?: string): void;
-    get logLevelManagement(): LogLevelManagement;
     setLevel(logLevel: LogLevel | string): void;
     startTiming(context: string): void;
     interimTiming(interimContext: string): void;
@@ -80,6 +81,5 @@ export declare class LoggerAdapter implements Logger {
     private processData;
     private processMessage;
     private overrideMatches;
-    private get overrides();
     private initializeOverrides;
 }

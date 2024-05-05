@@ -2,15 +2,15 @@
 Created by Franz Zemen 03/24/2024
 License Type: MIT
 */
-import { LogLevel } from "../logger.js";
-import { AttributesFormatOption, DataFormatOption, LogLevelManagement, MessageFormatOption } from "../log-context/log-execution-context.js";
-import { validateLogExecutionContext } from "../log-context/validation.js";
-import { ConsoleLogger } from "../console/console-logger.js";
-import { loadFromModule } from "@franzzemen/module-factory";
-import { FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset } from "../console/colors.js";
+import { LogLevel } from '../logger.js';
+import { AttributesFormatOption, DataFormatOption, LogLevelManagement, MessageFormatOption } from '../log-context/log-execution-context.js';
+import { validateLogExecutionContext } from '../log-context/validation.js';
+import { ConsoleLogger } from '../console/console-logger.js';
+import { loadFromModule } from '@franzzemen/module-factory';
+import { FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset } from '../console/colors.js';
 import moment from 'moment';
-import { inspect } from "node:util";
-import { isPromise } from "node:util/types";
+import { inspect } from 'node:util';
+import { isPromise } from 'node:util/types';
 const utc = moment.utc;
 function isContainered(obj, containedKey) {
     return obj.hasOwnProperty(containedKey);
@@ -37,7 +37,6 @@ export class LoggerAdapter {
     interim;
     attributes;
     // private pendingEsLoad: boolean = false;
-    _nativeLogger;
     /**
      * All parameters optional.
      * @param ec The context. It will default to LogDefaults.
@@ -108,6 +107,7 @@ export class LoggerAdapter {
         // Overrides could have overridden, and need to recalculate
         this.setLevel(this.ec.logConfig?.options?.level ?? LogLevel.info);
     }
+    _nativeLogger;
     get nativeLogger() {
         return this._nativeLogger;
     }
@@ -177,6 +177,9 @@ export class LoggerAdapter {
     get colorize() {
         return this.options.colorize ?? false;
     }
+    get logLevelManagement() {
+        return this.ec.logConfig?.nativeLogger?.logLevelManagement ?? LogLevelManagement.Adapter;
+    }
     get attributesAsString() {
         let started = false;
         let result = '';
@@ -210,6 +213,9 @@ export class LoggerAdapter {
         }
         return result;
     }
+    get overrides() {
+        return this.ec.logConfig?.overrides ?? [];
+    }
     setMethod(_method) {
         this.attributes.method = _method;
         return this;
@@ -239,9 +245,29 @@ export class LoggerAdapter {
     }
     out(message, color = FgCyan) {
         const currentHidePrefix = this.hidePrefix;
-        this.options.hidePrefix = true;
-        this.info(message, undefined, color);
-        this.options.hidePrefix = currentHidePrefix;
+        if (this.ec.logConfig) {
+            if (this.ec.logConfig.options) {
+                this.ec.logConfig.options.hidePrefix = true;
+                this.info(message, undefined, color);
+                this.ec.logConfig.options.hidePrefix = currentHidePrefix;
+            }
+            else {
+                this.ec.logConfig.options = {
+                    hidePrefix: true
+                };
+                this.info(message, undefined, color);
+                delete this.ec.logConfig.options;
+            }
+        }
+        else {
+            this.ec.logConfig = {
+                options: {
+                    hidePrefix: true
+                }
+            };
+            this.info(message, undefined, color);
+            delete this.ec.logConfig;
+        }
     }
     info(data, message, color = FgGreen) {
         if (data && this.isInfoEnabled()) {
@@ -284,9 +310,6 @@ export class LoggerAdapter {
         else {
             return this.isTracingEnabled();
         }
-    }
-    get logLevelManagement() {
-        return this.ec.logConfig?.nativeLogger?.logLevelManagement ?? LogLevelManagement.Adapter;
     }
     setLevel(logLevel) {
         this.level = LoggerAdapter.levels.indexOf(logLevel);
@@ -499,9 +522,6 @@ export class LoggerAdapter {
         else {
             return 'no conflict';
         }
-    }
-    get overrides() {
-        return this.ec.logConfig?.overrides ?? [];
     }
     initializeOverrides() {
         // Repos dominates.  If an override matches repo, and doesn't conflict on source or method, use it.
