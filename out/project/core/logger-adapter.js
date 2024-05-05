@@ -414,12 +414,13 @@ export class LoggerAdapter {
         let inspect = this.processInspect(inputColor);
         let data = this.processData(inputData, inputMessage);
         let prefix = this.processPrefix(cwcPrefix);
+        const colon = prefix.length > 0 ? ':' : '';
         if (message) {
             if (this.colorize) {
-                message = `${inputColor}${prefix}:${message}${Reset}`;
+                message = `${inputColor}${prefix}${colon}${message}${Reset}`;
             }
             else {
-                message = `${prefix}:${message}`;
+                message = `${prefix}${colon}${message}`;
             }
         }
         if (inspect) {
