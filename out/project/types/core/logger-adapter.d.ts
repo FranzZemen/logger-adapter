@@ -23,7 +23,7 @@ export declare class LoggerAdapter implements Logger {
      * @param method Provides logging info that the log event occurred in this method
      * @param nativeLogger  If passed, will use this over the native _nativeLogger or a module definition
      */
-    constructor(ec: LogExecutionContext, repo?: string, source?: string, method?: string, nativeLogger?: Logger);
+    constructor(ec: LogExecutionContext | {} | undefined, repo?: string, source?: string, method?: string, nativeLogger?: Logger);
     private _nativeLogger;
     get nativeLogger(): Logger;
     get options(): LoggingOptions;

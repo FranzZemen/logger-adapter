@@ -214,7 +214,7 @@ export function isLogExecutionContext(options: any | LogExecutionContext): optio
 
 const check: SyncCheckFunction = getSyncCheckFunction(logExecutionContextSchema);
 
-export function validateLogExecutionContext(context: LogExecutionContext): true | ValidationError[] {
+export function validateLogExecutionContext(context: Partial<LogExecutionContext>): true | ValidationError[] {
   const result = check(context);
   if (result === true) {
     context.validated = true;

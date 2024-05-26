@@ -6,8 +6,10 @@ import {
   LoggerAdapter,
   LogLevel,
   LogLevelManagement,
-  validateLogExecutionContext as validate
+  validateLogExecutionContext as validate,
+  isLogExecutionContext
 } from '@franzzemen/logger-adapter';
+
 
 let should = chai.should();
 let expect = chai.expect;
@@ -44,6 +46,16 @@ describe('logger-adapter tests', () => {
     result.should.be.true;
     const loggerAdapter: LoggerAdapter = new LoggerAdapter({app: {name: 'test'},logConfig: {options: {level: 'debug'}}});
     loggerAdapter.should.exist;
+    done();
+  });
+  it('should validate empty', done => {
+    let ec: Partial<LogExecutionContext> = {};
+    const result = validate(ec);
+    result.should.be.true;
+    if(isLogExecutionContext(ec)) {
+      const loggerAdapter: LoggerAdapter = new LoggerAdapter(ec);
+      loggerAdapter.should.exist;
+    }
     done();
   });
   it('should log', done => {

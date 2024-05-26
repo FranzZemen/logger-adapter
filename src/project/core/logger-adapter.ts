@@ -11,7 +11,7 @@ import {
   LogExecutionContext,
   LoggingOptions, LogLevelManagement, MessageFormatOption, OverrideOptions
 } from '../log-context/log-execution-context.js';
-import {validateLogExecutionContext} from '../log-context/validation.js';
+import {isLogExecutionContext, validateLogExecutionContext} from '../log-context/validation.js';
 import {ConsoleLogger} from '../console/console-logger.js';
 import {loadFromModule, ModuleDefinition} from '@franzzemen/module-factory';
 import {FgCyan, FgGreen, FgMagenta, FgRed, FgYellow, Reset} from '../console/colors.js';
@@ -66,6 +66,7 @@ export class LoggerAdapter implements Logger {
   private start: number | undefined;
   private interim: number | undefined;
   private attributes: AdapterAttributes;
+
   // private pendingEsLoad: boolean = false;
 
   /**
@@ -76,22 +77,29 @@ export class LoggerAdapter implements Logger {
    * @param method Provides logging info that the log event occurred in this method
    * @param nativeLogger  If passed, will use this over the native _nativeLogger or a module definition
    */
-  constructor(ec: LogExecutionContext, repo = '', source = '', method = '', nativeLogger?: Logger) {
-    if (!ec.validated) {
+  constructor(ec: LogExecutionContext | {} | undefined, repo = '', source = '', method = '', nativeLogger?: Logger) {
+    if (!ec) {
+      ec = {};
+    }
+    if (!isLogExecutionContext(ec) || !ec.validated) {
       const result = validateLogExecutionContext(ec);
-      if (isPromise(result)) {
-        const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
-        const err = new Error('LogExecutionContext validation should not result in async behavior');
-        localLogger.error(err);
-        throw err;
-      }
-      if (result !== true) {
-        const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
-        const msg = 'LogExecutionContext failed validation';
-        localLogger.warn(inspect(result, false, 5), msg);
-        const err = new Error(msg);
-        localLogger.error(err);
-        throw err;
+      if (isLogExecutionContext(ec)) {
+        if (isPromise(result)) {
+          const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
+          const err = new Error('LogExecutionContext validation should not result in async behavior');
+          localLogger.error(err);
+          throw err;
+        }
+        if (result !== true) {
+          const localLogger = nativeLogger ? nativeLogger : ec?.logConfig?.nativeLogger?.instance ? ec.logConfig.nativeLogger.instance : new ConsoleLogger();
+          const msg = 'LogExecutionContext failed validation';
+          localLogger.warn(inspect(result, false, 5), msg);
+          const err = new Error(msg);
+          localLogger.error(err);
+          throw err;
+        }
+      } else {
+        throw new  Error('LogExecutionContext validation failed');
       }
     }
     this.ec = {...{}, ...ec};

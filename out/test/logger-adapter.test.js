@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 import 'mocha';
-import { AttributesFormatOption, LoggerAdapter, LogLevel, LogLevelManagement, validateLogExecutionContext as validate } from '@franzzemen/logger-adapter';
+import { AttributesFormatOption, LoggerAdapter, LogLevel, LogLevelManagement, validateLogExecutionContext as validate, isLogExecutionContext } from '@franzzemen/logger-adapter';
 let should = chai.should();
 let expect = chai.expect;
 describe('logger-adapter tests', () => {
@@ -35,6 +35,16 @@ describe('logger-adapter tests', () => {
         result.should.be.true;
         const loggerAdapter = new LoggerAdapter({ app: { name: 'test' }, logConfig: { options: { level: 'debug' } } });
         loggerAdapter.should.exist;
+        done();
+    });
+    it('should validate empty', done => {
+        let ec = {};
+        const result = validate(ec);
+        result.should.be.true;
+        if (isLogExecutionContext(ec)) {
+            const loggerAdapter = new LoggerAdapter(ec);
+            loggerAdapter.should.exist;
+        }
         done();
     });
     it('should log', done => {
