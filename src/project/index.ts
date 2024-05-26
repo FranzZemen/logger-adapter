@@ -4,6 +4,7 @@ export * from './console/console-logger.js';
 export * from './console/colors.js';
 export * from './log-context/validation.js';
 export * from './core/logger-adapter.js';
+export * from './core/defaults.js';
 
 
 
