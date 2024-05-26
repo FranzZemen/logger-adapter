@@ -192,7 +192,7 @@ const logSchema: ValidationSchema = {
   }
 };
 
-const logSchemaWrapper: ValidationSchema = {
+export const logSchemaWrapper: ValidationSchema = {
   type: 'object',
   optional: true,
   default: LogExecutionContextDefaults.Log,

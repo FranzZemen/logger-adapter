@@ -171,7 +171,7 @@ const logSchema = {
         items: overrideOptionsSchemaWrapper
     }
 };
-const logSchemaWrapper = {
+export const logSchemaWrapper = {
     type: 'object',
     optional: true,
     default: LogExecutionContextDefaults.Log,

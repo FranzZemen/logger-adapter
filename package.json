@@ -36,7 +36,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@franzzemen/execution-context": "^7.0.3",
+    "@franzzemen/execution-context": "^7.0.4",
     "@franzzemen/fastest-validator-wrapper": "^2.0.2",
     "@franzzemen/module-factory": "^9.0.0",
     "@types/lodash": "^4.17.4",
